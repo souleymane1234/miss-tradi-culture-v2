@@ -1,0 +1,35 @@
+.site-promo-banner {
+  width: 100%;
+  line-height: 0;
+  background: var(--bg);
+}
+
+.site-promo-banner__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: clamp(16px, 3vw, 28px);
+  vertical-align: middle;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .site-promo-banner:not(.site-promo-banner--reveal) .site-promo-banner__img {
+    opacity: 0;
+    transform: translateY(14px) scale(0.995);
+  }
+
+  .site-promo-banner--reveal .site-promo-banner__img {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-promo-banner__img {
+    opacity: 1;
+    transform: none;
+  }
+}

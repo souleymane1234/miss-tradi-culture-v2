@@ -1,0 +1,61 @@
+.partenariat-page__cta-link {
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  background: linear-gradient(160deg, var(--gold-light), var(--gold), var(--gold-deep));
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  border: 1px solid color-mix(in srgb, var(--gold-light) 50%, var(--gold-deep) 50%);
+}
+
+.partenariat-page__cta-link:hover {
+  filter: brightness(1.06);
+}
+
+.partenariat-page__intro {
+  margin: 0 0 14px;
+  color: var(--text);
+  max-width: 62ch;
+}
+
+.partenariat-page__packs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .partenariat-page__packs {
+    grid-template-columns: 1fr;
+  }
+}
+
+.partenariat-page__pack {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  background: color-mix(in srgb, var(--bg) 92%, var(--gold) 8%);
+  text-align: left;
+}
+
+.partenariat-page__pack h3 {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+  color: var(--text-h);
+}
+
+.partenariat-page__pack ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.partenariat-page__footer-cta {
+  margin: 18px 0 0;
+}

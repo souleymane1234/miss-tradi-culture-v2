@@ -1,0 +1,132 @@
+.official-app {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  box-sizing: border-box;
+  padding: clamp(28px, 5vw, 48px) clamp(16px, 4vw, 48px);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.official-app::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold-line),
+    transparent
+  );
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.official-app__inner {
+  max-width: 48rem;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(12px, 2vw, 16px);
+}
+
+.official-app__eyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.official-app__title {
+  margin: 0;
+  max-width: 22ch;
+  font-family: var(--heading);
+  font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--text-h);
+}
+
+.official-app__title::after {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 2px;
+  margin: 12px auto 0;
+  border-radius: 2px;
+  background: var(--gold);
+}
+
+.official-app__lead {
+  margin: 4px 0 0;
+  max-width: 40ch;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.official-app__stores {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px 20px;
+  margin-top: clamp(8px, 1.5vw, 14px);
+}
+
+.official-app__store-link {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+  border-radius: 10px;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.official-app__store-link:hover {
+  opacity: 0.92;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .official-app__store-link:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.official-app__store-link:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+
+.official-app__badge {
+  display: block;
+  width: auto;
+  height: 48px;
+}
+
+.official-app__badge--apple {
+  height: 46px;
+}
+
+.official-app__badge--play {
+  height: 58px;
+}
+
+@media (min-width: 520px) {
+  .official-app__badge--apple {
+    height: 52px;
+  }
+
+  .official-app__badge--play {
+    height: 64px;
+  }
+}

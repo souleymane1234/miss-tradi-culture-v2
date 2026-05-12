@@ -1,0 +1,176 @@
+.concours-page {
+  background: var(--bg);
+}
+
+.concours-page__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-bottom: 40px;
+}
+
+.concours-page__section {
+  width: 100%;
+  padding: 26px 16px;
+  box-sizing: border-box;
+  background: var(--bg);
+}
+
+.concours-page__hero {
+  padding-top: 30px;
+}
+
+.concours-page__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.concours-page__eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+
+.concours-page__hero h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.55rem, 3.2vw, 2.05rem);
+  line-height: 1.15;
+}
+
+.concours-page__lead {
+  margin: 0;
+  color: var(--text);
+  max-width: 62ch;
+}
+
+.concours-page__actions {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.concours-page__btn-primary {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  background: linear-gradient(160deg, var(--gold-light), var(--gold), var(--gold-deep));
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.concours-page__btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.concours-page__actions a {
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  background: var(--social-bg);
+  color: var(--text-h);
+  border: 1px solid var(--border);
+}
+
+.concours-page__actions a:hover {
+  border-color: color-mix(in srgb, var(--gold) 40%, var(--border));
+}
+
+.concours-page__hero-image {
+  margin-top: 14px;
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.concours-page__timeline,
+.concours-page__list,
+.concours-page__faq {
+  margin-top: 14px;
+}
+
+.concours-page__step,
+.concours-page__faq-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  background: color-mix(in srgb, var(--bg) 92%, var(--gold) 8%);
+}
+
+.concours-page__section h2 {
+  margin: 0 0 12px;
+}
+
+.concours-page__timeline {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.concours-page__step {
+  height: 100%;
+}
+
+.concours-page__step-date {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  color: var(--gold-deep);
+  font-weight: 600;
+}
+
+.concours-page__step h3 {
+  margin: 0 0 6px;
+  color: var(--text-h);
+}
+
+.concours-page__step p {
+  margin: 0;
+  color: var(--text);
+}
+
+.concours-page__list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+  color: var(--text);
+}
+
+.concours-page__inline-link {
+  color: var(--gold-deep);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.concours-page__inline-link:hover {
+  text-decoration: underline;
+}
+
+.concours-page__faq {
+  display: grid;
+  gap: 10px;
+}
+
+.concours-page__faq-item h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+
+.concours-page__faq-item p {
+  margin: 0;
+  color: var(--text);
+}

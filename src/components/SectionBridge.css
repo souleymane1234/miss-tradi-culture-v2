@@ -1,0 +1,144 @@
+.section-bridge {
+  display: block;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.section-bridge--wave {
+  position: relative;
+  z-index: 2;
+  height: clamp(40px, 7vw, 72px);
+  margin-top: clamp(-52px, -6vw, -32px);
+  margin-bottom: clamp(-28px, -3vw, -16px);
+  line-height: 0;
+  pointer-events: none;
+}
+
+.section-bridge--wave::after {
+  content: '';
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 6px;
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--gold) 38%, transparent);
+  filter: blur(9px);
+  opacity: 0.5;
+}
+
+.section-bridge__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.section-bridge__fill {
+  fill: var(--bg);
+}
+
+.section-bridge__line {
+  stroke: color-mix(in srgb, var(--gold) 55%, transparent);
+  stroke-dasharray: 10 8;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .section-bridge--wave {
+    animation: section-bridge-float 7s ease-in-out infinite;
+  }
+
+  .section-bridge__line {
+    animation: section-bridge-line-flow 8s linear infinite;
+  }
+
+  @keyframes section-bridge-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(3px);
+    }
+  }
+
+  @keyframes section-bridge-line-flow {
+    from {
+      stroke-dashoffset: 0;
+    }
+    to {
+      stroke-dashoffset: -180;
+    }
+  }
+}
+
+.section-bridge--ribbon {
+  position: relative;
+  z-index: 1;
+  height: 5px;
+  margin: 0;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--gold) 18%, transparent) 20%,
+    color-mix(in srgb, var(--gold) 55%, transparent) 50%,
+    color-mix(in srgb, var(--gold) 18%, transparent) 80%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--gold) 24%, transparent),
+    0 0 18px color-mix(in srgb, var(--gold) 18%, transparent);
+}
+
+.section-bridge--ribbon::before {
+  content: '';
+  position: absolute;
+  inset: -1px 0;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, white 72%, var(--gold) 28%) 50%,
+      transparent 100%
+    );
+  mix-blend-mode: screen;
+  opacity: 0.4;
+  transform: translateX(-100%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .section-bridge--ribbon {
+    animation: section-bridge-shimmer 5s ease-in-out infinite;
+  }
+
+  .section-bridge--ribbon::before {
+    animation: section-bridge-spark 4.2s ease-in-out infinite;
+  }
+
+  @keyframes section-bridge-shimmer {
+    0% {
+      background-position: 100% 0;
+    }
+    100% {
+      background-position: -100% 0;
+    }
+  }
+
+  @keyframes section-bridge-spark {
+    0%,
+    20% {
+      transform: translateX(-120%);
+      opacity: 0;
+    }
+    30%,
+    70% {
+      transform: translateX(120%);
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateX(120%);
+      opacity: 0;
+    }
+  }
+}

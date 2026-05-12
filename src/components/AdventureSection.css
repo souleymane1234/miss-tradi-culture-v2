@@ -1,0 +1,194 @@
+.adv-section {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  box-sizing: border-box;
+  padding: clamp(28px, 5vw, 56px) clamp(16px, 4vw, 48px);
+  background: color-mix(in srgb, var(--social-bg) 65%, var(--bg));
+  border-top: 1px solid var(--border);
+}
+
+.adv-section__inner {
+  max-width: 72rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(24px, 4vw, 40px);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .adv-section__inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+    gap: clamp(32px, 5vw, 48px);
+  }
+}
+
+.adv-section__content {
+  text-align: left;
+}
+
+.adv-section__eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.adv-section__title {
+  margin: 0 0 16px;
+  font-family: var(--heading);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  color: var(--text-h);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.adv-section__title-line {
+  font-size: clamp(1.15rem, 2.8vw, 1.45rem);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.adv-section__title-accent {
+  font-size: clamp(1.75rem, 5vw, 2.75rem);
+  color: var(--text-h);
+}
+
+.adv-section__title-accent::after {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 3px;
+  margin-top: 14px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--gold),
+    color-mix(in srgb, var(--gold) 35%, transparent)
+  );
+}
+
+.adv-section__body {
+  margin: 0 0 24px;
+  max-width: 38ch;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.adv-section__subhead {
+  margin: 0 0 8px;
+  font-family: var(--heading);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.adv-section__apply-hint {
+  margin: 0 0 20px;
+  max-width: 36ch;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.adv-section__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: #fff;
+  text-decoration: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  background: linear-gradient(
+    168deg,
+    var(--gold-light) 0%,
+    var(--gold) 44%,
+    var(--gold-deep) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--gold-light) 50%, var(--gold-deep) 50%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition:
+    color 0.22s ease,
+    filter 0.22s ease,
+    border-color 0.22s ease,
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.adv-section__cta:hover {
+  color: #fff;
+  filter: brightness(1.07) saturate(1.05);
+  border-color: var(--gold-light);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 4px 14px var(--gold-glow);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .adv-section__cta:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.adv-section__cta:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.adv-section__figure {
+  margin: 0;
+  padding: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  line-height: 0;
+  background: var(--bg);
+}
+
+.adv-section__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .adv-section__content {
+    opacity: 0;
+    transform: translate3d(-44px, 20px, 0);
+    transition:
+      opacity 0.65s cubic-bezier(0.16, 1, 0.35, 1),
+      transform 0.65s cubic-bezier(0.16, 1, 0.35, 1);
+  }
+
+  .adv-section__figure {
+    opacity: 0;
+    transform: translate3d(44px, 20px, 0) scale(0.97);
+    transition:
+      opacity 0.65s cubic-bezier(0.16, 1, 0.35, 1),
+      transform 0.65s cubic-bezier(0.16, 1, 0.35, 1);
+  }
+
+  .adv-section--visible .adv-section__content {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.06s;
+  }
+
+  .adv-section--visible .adv-section__figure {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.18s;
+  }
+}
