@@ -39,6 +39,21 @@
   pointer-events: none;
 }
 
+.site-hero-video--controls .site-hero-video__overlay {
+  align-content: end;
+  padding-bottom: 4.5rem;
+  background: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 20%) 0%,
+    rgb(0 0 0 / 10%) 50%,
+    rgb(0 0 0 / 55%) 100%
+  );
+}
+
+.site-hero-video--controls .site-hero-video__media {
+  pointer-events: auto;
+}
+
 .site-hero-video__subtitle {
   margin: 0;
   color: #f8d36b;

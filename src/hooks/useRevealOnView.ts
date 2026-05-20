@@ -22,10 +22,28 @@ export function useRevealOnView<T extends HTMLElement = HTMLElement>(
           ob.disconnect()
         }
       },
-      { rootMargin: '0px 0px -6% 0px', threshold: 0.08, ...options },
+      { rootMargin: '0px 0px -2% 0px', threshold: 0.01, ...options },
     )
     ob.observe(el)
-    return () => ob.disconnect()
+
+    requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect()
+      const vh = window.innerHeight || document.documentElement.clientHeight
+      if (rect.top < vh * 0.95 && rect.bottom > 0) {
+        setIsVisible(true)
+        ob.disconnect()
+      }
+    })
+
+    const fallback = window.setTimeout(() => {
+      setIsVisible(true)
+      ob.disconnect()
+    }, 900)
+
+    return () => {
+      ob.disconnect()
+      window.clearTimeout(fallback)
+    }
   }, [isVisible])
 
   return { ref, isVisible }

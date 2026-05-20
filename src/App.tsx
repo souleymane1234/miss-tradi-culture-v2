@@ -6,6 +6,8 @@ import { ActualitesAccess } from './components/ActualitesAccess'
 import { ActualitesPage } from './components/ActualitesPage'
 import { ConcoursPage } from './components/ConcoursPage'
 import { PartenariatPage } from './components/PartenariatPage'
+import { EditionPage } from './components/EditionPage'
+import { VotePage } from './components/VotePage'
 import { PartnersTrustCarousel } from './components/PartnersTrustCarousel'
 import { OfficialAppPromo } from './components/OfficialAppPromo'
 import { PromoBanner } from './components/PromoBanner'
@@ -18,6 +20,8 @@ function App() {
   const isConcoursPage = window.location.pathname.startsWith('/concours')
 
   const isPartenariatPage = window.location.pathname.startsWith('/partenariat')
+  const isEditionPage = window.location.pathname.startsWith('/edition')
+  const isVotePage = window.location.pathname.startsWith('/vote')
 
   if (isActualitesPage) {
     return (
@@ -46,6 +50,28 @@ function App() {
       <>
         <Navbar />
         <PartenariatPage />
+        <div className="ticks"></div>
+        <Footer />
+      </>
+    )
+  }
+
+  if (isEditionPage) {
+    return (
+      <>
+        <Navbar />
+        <EditionPage />
+        <div className="ticks"></div>
+        <Footer />
+      </>
+    )
+  }
+
+  if (isVotePage) {
+    return (
+      <>
+        <Navbar />
+        <VotePage />
         <div className="ticks"></div>
         <Footer />
       </>

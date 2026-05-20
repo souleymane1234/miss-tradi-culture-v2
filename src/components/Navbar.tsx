@@ -8,14 +8,26 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const isActualitesPage = window.location.pathname.startsWith('/actualites')
   const isConcoursPage = window.location.pathname.startsWith('/concours')
+  const isEditionPage = window.location.pathname.startsWith('/edition')
+  const isPlayPage = window.location.pathname.startsWith('/play')
   const isPartenariatPage = window.location.pathname.startsWith('/partenariat')
+  const isVotePage = window.location.pathname.startsWith('/vote')
   const homePrefix =
-    isActualitesPage || isConcoursPage || isPartenariatPage ? '/#' : '#'
+    isActualitesPage ||
+    isConcoursPage ||
+    isEditionPage ||
+    isPlayPage ||
+    isPartenariatPage ||
+    isVotePage
+      ? '/#'
+      : '#'
   const navLinks = [
     { href: `${homePrefix}accueil`, label: 'Accueil' },
     // { href: `${homePrefix}application`, label: 'Application' },
     { href: '/actualites', label: 'Actualites' },
     { href: '/concours', label: 'Le concours' },
+    { href: '/edition', label: 'Edition' },
+    { href: '/play', label: 'Play' },
     { href: '/partenariat', label: 'Partenariat' },
     { href: `${homePrefix}contact`, label: 'Contact' },
   ] as const
@@ -30,7 +42,13 @@ export function Navbar() {
   }, [])
 
   const isSolid =
-    isActualitesPage || isConcoursPage || isPartenariatPage || scrolled || menuOpen
+    isActualitesPage ||
+    isConcoursPage ||
+    isPlayPage ||
+    isPartenariatPage ||
+    isVotePage ||
+    scrolled ||
+    menuOpen
 
   return (
     <header
