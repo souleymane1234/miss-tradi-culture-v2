@@ -18,7 +18,7 @@ export function MissTradiDescription() {
               Miss Tradi Culture
             </h2>
           </div>
-          <a className="mtd-desc__cta-link" href="#concours">
+          <a className="mtd-desc__cta-link" href="/concours">
             Découvrir le concours
           </a>
         </div>

@@ -1,29 +1,39 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useRevealOnView } from '../hooks/useRevealOnView'
-import { HeroVideo } from './HeroVideo'
-import { PromoBanner } from './PromoBanner'
-import { SectionBridge } from './SectionBridge'
+import { USE_MOCK_DATA } from '../config/app-config'
 import {
   CURRENT_EDITION_YEAR,
   EDITIONS,
   type Candidate,
   type Edition,
 } from '../data/editions'
+import {
+  useEditionFromApi,
+  useEmissionEditionsCatalog,
+  useResolvedEmission,
+} from '../hooks/use-emission-queries'
+import { formatEditionStage, formatFcfa } from '../lib/edition-presentation'
+import { CandidatureModal } from './CandidatureModal'
+import { EditionVideoPlayer } from './EditionVideoPlayer'
+import { HeroVideo } from './HeroVideo'
+import './HeroVideo.css'
+import { PromoBanner } from './PromoBanner'
+import { SectionBridge } from './SectionBridge'
 import './ConcoursPage.css'
 import './EditionPage.css'
 
-const SPONSOR_TIER_LABEL: Record<Edition['sponsors'][number]['tier'], string> = {
-  principal: 'Partenaire principal',
-  or: 'Or',
-  argent: 'Argent',
-  bronze: 'Bronze',
-}
-
-function parseEditionYearFromPath(): number | null {
-  const match = window.location.pathname.match(/^\/edition\/(\d{4})\/?$/)
-  if (!match) return null
-  const year = Number(match[1])
-  return EDITIONS.some((e) => e.year === year) ? year : null
+function parseEditionIdFromPath(
+  catalog: { editionId: string; year: number; status?: string }[],
+): string | null {
+  const yearMatch = window.location.pathname.match(/^\/edition\/(\d{4})\/?$/)
+  if (yearMatch) {
+    const year = Number(yearMatch[1])
+    return catalog.find((c) => c.year === year)?.editionId ?? null
+  }
+  if (window.location.pathname === '/edition' || window.location.pathname === '/edition/') {
+    const current = catalog.find((c) => c.status === 'current') ?? catalog[0]
+    return current?.editionId ?? null
+  }
+  return null
 }
 
 function CrownIcon() {
@@ -205,26 +215,165 @@ function CandidateVideoModal({
   )
 }
 
+type EditionInfoModalKind = 'lots' | 'reglement' | 'principes' | 'participantes'
+
+function EditionInfoModal({
+  kind,
+  edition,
+  isPast,
+  onClose,
+}: {
+  kind: EditionInfoModalKind
+  edition: Edition
+  isPast: boolean
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const titleByKind: Record<EditionInfoModalKind, string> = {
+    lots: 'Lots',
+    reglement: 'Reglement du jeu',
+    principes: 'Principes du jeu',
+    participantes: isPast ? 'Participantes de l’edition' : 'Participantes en lice',
+  }
+
+  return (
+    <div className="edition-page__modal" role="presentation" onClick={onClose}>
+      <dialog
+        className="edition-page__modal-dialog"
+        open
+        aria-labelledby="edition-info-modal-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="edition-page__modal-close"
+          aria-label="Fermer"
+          onClick={onClose}
+        >
+          ×
+        </button>
+
+        <div className="edition-page__modal-content">
+          <h2 id="edition-info-modal-title">{titleByKind[kind]}</h2>
+
+          {kind === 'lots' && (
+            <div className="edition-page__modal-list">
+              {edition.prizes.map((prize) => (
+                <article key={prize.title} className="edition-page__modal-item">
+                  <h3>{prize.title}</h3>
+                  <p>{prize.description || '—'}</p>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {kind === 'reglement' && (
+            <ul className="edition-page__modal-bullets">
+              {edition.rulesSummary.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
+          )}
+
+          {kind === 'principes' && (
+            <p className="edition-page__modal-text">
+              {edition.theme || 'Les principes seront communiques prochainement.'}
+            </p>
+          )}
+
+          {kind === 'participantes' && (
+            <div className="edition-page__modal-list">
+              {edition.candidates.map((candidate) => (
+                <article key={candidate.id} className="edition-page__modal-item">
+                  <h3>{candidate.name}</h3>
+                  <p>
+                    {candidate.tradition} · {candidate.region}
+                  </p>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </dialog>
+    </div>
+  )
+}
+
 
 export function EditionPage() {
-  const initialYear = parseEditionYearFromPath() ?? CURRENT_EDITION_YEAR
-  const [selectedYear, setSelectedYear] = useState(initialYear)
-  const [videoCandidate, setVideoCandidate] = useState<Candidate | null>(null)
-  const [regionFilter, setRegionFilter] = useState<string>('all')
-
-  const edition = useMemo(
-    () => EDITIONS.find((e) => e.year === selectedYear) ?? EDITIONS[0],
-    [selectedYear],
+  const resolvedEmission = useResolvedEmission()
+  const catalogQuery = useEmissionEditionsCatalog(
+    USE_MOCK_DATA ? null : (resolvedEmission.emission?.id ?? null),
   )
+  const pointsPerVote = resolvedEmission.pointsPerVote
+
+  const catalog = USE_MOCK_DATA
+    ? EDITIONS.map((e) => ({
+        year: e.year,
+        editionId: String(e.year),
+        status: e.status,
+        title: e.title,
+        imageUrl: e.coverImageSrc,
+      }))
+    : (catalogQuery.data ?? [])
+
+  const defaultTab = catalog.find((c) => c.status === 'current') ?? catalog[0]
+  const initialEditionId = parseEditionIdFromPath(catalog) ?? defaultTab?.editionId ?? null
+
+  const [selectedEditionId, setSelectedEditionId] = useState<string | null>(initialEditionId)
+  const [videoCandidate, setVideoCandidate] = useState<Candidate | null>(null)
+  const [infoModal, setInfoModal] = useState<EditionInfoModalKind | null>(null)
+  const [regionFilter, setRegionFilter] = useState<string>('all')
+  const [candidatureOpen, setCandidatureOpen] = useState(false)
+
+  const selectedTab =
+    catalog.find((c) => c.editionId === selectedEditionId) ?? defaultTab ?? catalog[0]
+  const selectedYear = selectedTab?.year ?? CURRENT_EDITION_YEAR
+
+  const apiEditionId = USE_MOCK_DATA ? null : (selectedTab?.editionId ?? null)
+
+  const {
+    edition: apiEdition,
+    editionDetail,
+    isLoading: editionLoading,
+    isError: editionError,
+  } = useEditionFromApi(apiEditionId, pointsPerVote)
+
+  const edition = useMemo(() => {
+    if (USE_MOCK_DATA) {
+      return EDITIONS.find((e) => e.year === selectedYear) ?? EDITIONS[0]
+    }
+    return apiEdition
+  }, [selectedYear, apiEdition])
+
+  useEffect(() => {
+    if (USE_MOCK_DATA || catalog.length === 0) return
+    const fromPath = parseEditionIdFromPath(catalog)
+    if (fromPath && fromPath !== selectedEditionId) {
+      setSelectedEditionId(fromPath)
+      return
+    }
+    if (!catalog.some((c) => c.editionId === selectedEditionId) && defaultTab) {
+      setSelectedEditionId(defaultTab.editionId)
+    }
+  }, [catalog, defaultTab, selectedEditionId])
 
   const regions = useMemo(
-    () => [...new Set(edition.candidates.map((c) => c.region))].sort(),
+    () => [...new Set((edition?.candidates ?? []).map((c) => c.region))].sort(),
     [edition],
   )
 
   const filteredCandidates = useMemo(() => {
-    if (regionFilter === 'all') return edition.candidates
-    return edition.candidates.filter((c) => c.region === regionFilter)
+    const list = edition?.candidates ?? []
+    if (regionFilter === 'all') return list
+    return list.filter((c) => c.region === regionFilter)
   }, [edition, regionFilter])
 
   const rankedCandidates = useMemo(
@@ -236,53 +385,228 @@ export function EditionPage() {
     window.location.href = `/vote/${candidate.id}`
   }
 
-  const selectEdition = (year: number) => {
-    setSelectedYear(year)
+  const selectEdition = (editionId: string, year: number) => {
+    setSelectedEditionId(editionId)
     setRegionFilter('all')
     setVideoCandidate(null)
-    const path = year === CURRENT_EDITION_YEAR ? '/edition' : `/edition/${year}`
+    const canonical = catalog.find((c) => c.status === 'current') ?? catalog[0]
+    const path =
+      canonical && editionId === canonical.editionId ? '/edition' : `/edition/${year}`
     window.history.replaceState(null, '', path)
   }
 
-  const isPast = edition.status === 'past'
-  const { ref: presentationRef, isVisible: presentationVisible } =
-    useRevealOnView<HTMLElement>()
+  const isPast = edition?.status === 'past'
+
+  /** imageUrl de l'édition sélectionnée uniquement */
+  const editionImageUrl = useMemo(() => {
+    if (!selectedTab?.editionId) return ''
+    const fromDetail = edition?.coverImageSrc?.trim()
+    const fromCatalog = selectedTab.imageUrl?.trim()
+    const fromEmissionList = resolvedEmission.emission?.editions
+      .find((e) => e.id === selectedTab.editionId)
+      ?.imageUrl?.trim()
+    return fromDetail || fromCatalog || fromEmissionList || ''
+  }, [
+    edition?.coverImageSrc,
+    resolvedEmission.emission?.editions,
+    selectedTab?.editionId,
+    selectedTab?.imageUrl,
+  ])
+
+  /** Description de la dernière émission résolue */
+  const emissionDescription =
+    resolvedEmission.emissionDescription ||
+    (USE_MOCK_DATA
+      ? 'Le grand rendez-vous des ambassadrices de la culture et du style ivoirien.'
+      : '')
+
+  const presentation = useMemo(() => {
+    const image =
+      editionDetail?.imageUrl?.trim() ||
+      editionImageUrl ||
+      edition?.coverImageSrc?.trim() ||
+      ''
+
+    if (editionDetail) {
+      const description =
+        editionDetail.description?.trim() ||
+        editionDetail.principles?.trim() ||
+        edition?.description ||
+        ''
+      const principles =
+        editionDetail.principles?.trim() &&
+        editionDetail.description?.trim() &&
+        editionDetail.principles.trim() !== editionDetail.description.trim()
+          ? editionDetail.principles.trim()
+          : ''
+
+      return {
+        eyebrow: editionDetail.emissionName,
+        title: editionDetail.title,
+        description,
+        principles,
+        imageUrl: image,
+        editionVideo: editionDetail.video?.url?.trim() ? editionDetail.video : null,
+        stage: formatEditionStage(editionDetail.currentStage),
+        dates: edition?.dates ?? 'Dates a confirmer',
+        candidateCount: edition?.candidateCount ?? editionDetail.candidates.length,
+        candidaturePrice: editionDetail.isPaidEdition
+          ? formatFcfa(editionDetail.candidaturePrice)
+          : null,
+        quizPrice:
+          editionDetail.quizEnabled && editionDetail.quizPrice != null
+            ? formatFcfa(editionDetail.quizPrice)
+            : null,
+        statusLabel: isPast ? 'Edition terminee' : 'Edition en cours',
+      }
+    }
+
+    return {
+      eyebrow: resolvedEmission.emission?.title ?? 'Miss Tradi Culture',
+      title: edition?.title ?? '',
+      description: edition?.description || emissionDescription,
+      principles: edition?.theme ?? '',
+      imageUrl: image,
+      editionVideo: null,
+      stage: isPast ? 'Edition terminee' : 'Edition en cours',
+      dates: edition?.dates ?? 'Dates a confirmer',
+      candidateCount: edition?.candidateCount ?? 0,
+      candidaturePrice: null as string | null,
+      quizPrice: null as string | null,
+      statusLabel: isPast ? 'Edition terminee' : 'Edition en cours',
+    }
+  }, [
+    edition,
+    editionDetail,
+    editionImageUrl,
+    emissionDescription,
+    isPast,
+    resolvedEmission.emission?.title,
+  ])
+
+  if (
+    !USE_MOCK_DATA &&
+    (resolvedEmission.isLoading || catalogQuery.isLoading || editionLoading)
+  ) {
+    return (
+      <main className="concours-page edition-page edition-page--loading">
+        <div className="edition-page__shell">
+          <p>Chargement des editions…</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (!USE_MOCK_DATA && (resolvedEmission.isError || !resolvedEmission.emission)) {
+    return (
+      <main className="concours-page edition-page edition-page--error">
+        <div className="edition-page__shell">
+          <h1>Emission indisponible</h1>
+          <p>Impossible de charger l&apos;emission. Reessayez plus tard.</p>
+          <a href="/">Retour a l&apos;accueil</a>
+        </div>
+      </main>
+    )
+  }
+
+  if (!edition) {
+    return (
+      <main className="concours-page edition-page edition-page--error">
+        <div className="edition-page__shell">
+          <h1>Edition indisponible</h1>
+          <p>
+            {editionError || catalogQuery.isError
+              ? 'Impossible de charger les donnees. Reessayez plus tard.'
+              : catalog.length === 0
+                ? 'Aucune edition publiee pour cette emission.'
+                : 'Aucune edition trouvee.'}
+          </p>
+          <a href="/">Retour a l&apos;accueil</a>
+        </div>
+      </main>
+    )
+  }
+
+  const yearTabs = catalog
 
   return (
     <main className="concours-page edition-page" aria-labelledby="edition-title">
+      <CandidatureModal
+        open={candidatureOpen}
+        onClose={() => setCandidatureOpen(false)}
+        editionId={selectedTab?.editionId ?? null}
+        editionTitle={selectedTab?.title ?? edition.title}
+        emissionTitle={resolvedEmission.emission?.title}
+      />
       {videoCandidate && (
         <CandidateVideoModal
           candidate={videoCandidate}
           onClose={() => setVideoCandidate(null)}
         />
       )}
+      {infoModal && (
+        <EditionInfoModal
+          kind={infoModal}
+          edition={edition}
+          isPast={isPast}
+          onClose={() => setInfoModal(null)}
+        />
+      )}
 
-      <HeroVideo
-        key={edition.year}
-        src={edition.videoSrc}
-        poster={edition.videoPosterSrc}
-        subtitle={`Edition ${edition.year}`}
-        title={edition.theme}
-      />
+      {presentation.editionVideo ? (
+        <section
+          className="edition-page__edition-hero"
+          aria-label="Video de l'edition"
+        >
+          <EditionVideoPlayer
+            key={presentation.editionVideo.id ?? presentation.editionVideo.url}
+            video={presentation.editionVideo}
+            poster={presentation.imageUrl}
+            variant="hero"
+          />
+          <div className="site-hero-video__overlay">
+            <p className="site-hero-video__subtitle">
+              {resolvedEmission.emission?.title ?? presentation.eyebrow ?? 'Miss Tradi Culture'}
+            </p>
+            <h1 className="site-hero-video__title">{`Edition ${edition.year}`}</h1>
+          </div>
+        </section>
+      ) : (
+        <HeroVideo
+          key={`${edition.year}-${presentation.imageUrl}`}
+          imageSrc={
+            presentation.imageUrl ||
+            edition.coverImageSrc ||
+            edition.videoPosterSrc ||
+            undefined
+          }
+          imageAlt={`Visuel edition ${edition.year}`}
+          subtitle={resolvedEmission.emission?.title ?? presentation.eyebrow ?? 'Miss Tradi Culture'}
+          title={`Edition ${edition.year}`}
+        />
+      )}
+
       <PromoBanner />
       <SectionBridge variant="ribbon" />
 
       <section id="edition" className="concours-page__stack">
         <section className="concours-page__section concours-page__hero">
           <div className="concours-page__inner">
-            <p className="concours-page__eyebrow">Edition</p>
+            <p className="concours-page__eyebrow">
+              {resolvedEmission.emission?.title ?? 'Edition'}
+            </p>
             <h1 id="edition-title">{edition.title}</h1>
             <p className="concours-page__lead">{edition.tagline}</p>
 
             <div className="edition-page__year-tabs" role="tablist" aria-label="Choisir une edition">
-              {EDITIONS.map((e) => (
+              {yearTabs.map((e) => (
                 <button
-                  key={e.year}
+                  key={e.editionId}
                   type="button"
                   role="tab"
-                  aria-selected={e.year === selectedYear}
-                  className={`edition-page__year-tab${e.year === selectedYear ? ' edition-page__year-tab--active' : ''}${e.status === 'current' ? ' edition-page__year-tab--current' : ''}`}
-                  onClick={() => selectEdition(e.year)}
+                  aria-selected={e.editionId === selectedTab?.editionId}
+                  className={`edition-page__year-tab${e.editionId === selectedTab?.editionId ? ' edition-page__year-tab--active' : ''}${e.status === 'current' ? ' edition-page__year-tab--current' : ''}`}
+                  onClick={() => selectEdition(e.editionId, e.year)}
                 >
                   {e.year}
                   {e.status === 'current' && (
@@ -302,43 +626,83 @@ export function EditionPage() {
 
         <SectionBridge variant="wave" />
 
-        <section
-          key={`presentation-${selectedYear}`}
-          ref={presentationRef}
-          className={`concours-page__section edition-page__presentation-section${presentationVisible ? ' edition-page__presentation-section--visible' : ''}`}
-        >
+        <section key={`presentation-${selectedYear}`} className="concours-page__section edition-page__presentation-section">
           <div className="edition-page__presentation">
-            <h2>Presentation de l&apos;edition {edition.year}</h2>
             <div className="edition-page__presentation-grid">
-              <div className="edition-page__presentation-visual">
-                <img
-                  src="/miss.jpg"
-                  alt={`Visuel ${edition.title}`}
-                  loading="lazy"
-                />
-              </div>
               <div className="edition-page__presentation-content">
-                <p className="concours-page__eyebrow edition-page__theme">{edition.theme}</p>
-                <dl className="edition-page__meta edition-page__meta--presentation">
-                  <div className="edition-page__meta-card">
-                    <dt>Dates</dt>
-                    <dd>{edition.dates}</dd>
-                  </div>
-                  <div className="edition-page__meta-card">
-                    <dt>Lieu</dt>
-                    <dd>{edition.location}</dd>
-                  </div>
-                  <div className="edition-page__meta-card">
-                    <dt>Candidates</dt>
-                    <dd>{edition.candidateCount} participantes</dd>
-                  </div>
-                  <div className="edition-page__meta-card">
-                    <dt>Statut</dt>
-                    <dd>{isPast ? 'Edition terminee' : 'Edition en cours'}</dd>
-                  </div>
-                </dl>
-                <p className="edition-page__description">{edition.description}</p>
+                <p className="edition-page__presentation-eyebrow">{presentation.eyebrow}</p>
+                <h2 className="edition-page__presentation-title">{presentation.title}</h2>
+                <p className="edition-page__presentation-vote-line">
+                  Chaque vote compte — {resolvedEmission.pointsPerVote} pts par pack valide.
+                </p>
+                {presentation.description && <p className="edition-page__presentation-lead">{presentation.description}</p>}
+                {presentation.principles && (
+                  <p id="edition-principes" className="edition-page__presentation-sub">
+                    {presentation.principles}
+                  </p>
+                )}
+                <ul className="edition-page__presentation-list" aria-label="Informations edition">
+                  <li>
+                    <span>Dates</span>
+                    <strong>{presentation.dates}</strong>
+                  </li>
+                  <li>
+                    <span>Candidates</span>
+                    <strong>{presentation.candidateCount}</strong>
+                  </li>
+                  <li>
+                    <span>Statut</span>
+                    <strong>{presentation.statusLabel}</strong>
+                  </li>
+                  <li>
+                    <span>Inscription</span>
+                    <strong>{presentation.candidaturePrice ?? 'Tarif a confirmer'}</strong>
+                  </li>
+                  {presentation.quizPrice && (
+                    <li>
+                      <span>Quiz</span>
+                      <strong>{presentation.quizPrice}</strong>
+                    </li>
+                  )}
+                </ul>
+                <p className="edition-page__presentation-status">
+                  {presentation.stage ?? presentation.statusLabel} — completez le formulaire pour postuler.
+                </p>
+
+                <div className="edition-page__presentation-sponsors-inline" aria-label="Sponsors">
+                  {edition.sponsors.map((sponsor) => (
+                    <img
+                      key={`${sponsor.name}-${sponsor.logoSrc}`}
+                      src={sponsor.logoSrc}
+                      alt={sponsor.name}
+                      loading="lazy"
+                    />
+                  ))}
+                </div>
+
+                <nav className="edition-page__presentation-links" aria-label="Acces rapides edition">
+                  <button type="button" onClick={() => setInfoModal('lots')}>Lots</button>
+                  <button type="button" onClick={() => setInfoModal('reglement')}>Reglement du jeu</button>
+                  <button type="button" onClick={() => setInfoModal('principes')}>Principes du jeu</button>
+                </nav>
               </div>
+
+              <article className="edition-page__presentation-image-card" aria-label="Photo de l'edition">
+                {presentation.imageUrl ? (
+                  <img
+                    src={presentation.imageUrl}
+                    alt={`Photo ${presentation.title}`}
+                    loading="lazy"
+                    className="edition-page__presentation-image"
+                  />
+                ) : (
+                  <div
+                    className="edition-page__presentation-visual-placeholder"
+                    role="img"
+                    aria-label={`Photo ${presentation.title}`}
+                  />
+                )}
+              </article>
             </div>
           </div>
         </section>
@@ -396,63 +760,6 @@ export function EditionPage() {
           </div>
         </section>
 
-        <SectionBridge variant="wave" />
-
-        <section className="concours-page__section">
-          <div className="concours-page__inner">
-            <h2>Lots et recompenses</h2>
-            <div className="edition-page__prizes">
-              {edition.prizes.map((prize) => (
-                <article key={prize.title} className="edition-page__prize">
-                  <h3>{prize.title}</h3>
-                  <p>{prize.description}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <SectionBridge variant="ribbon" />
-
-        <section className="concours-page__section">
-          <div className="concours-page__inner">
-            <h2>Reglement</h2>
-            <ul className="concours-page__list edition-page__rules">
-              {edition.rulesSummary.map((rule) => (
-                <li key={rule}>{rule}</li>
-              ))}
-            </ul>
-            <a className="concours-page__inline-link" href={edition.rulesDocumentHref}>
-              Telecharger le reglement complet (PDF)
-            </a>
-          </div>
-        </section>
-
-        <SectionBridge variant="wave" />
-
-        <section className="concours-page__section">
-          <div className="concours-page__inner">
-            <h2>Sponsors de l&apos;edition {edition.year}</h2>
-            <p className="edition-page__section-intro">
-              Merci a nos partenaires qui accompagnent chaque edition du concours.
-            </p>
-            <div className="edition-page__sponsors">
-              {edition.sponsors.map((sponsor) => (
-                <article key={`${sponsor.name}-${sponsor.logoSrc}`} className="edition-page__sponsor">
-                  <img src={sponsor.logoSrc} alt={sponsor.name} loading="lazy" />
-                  <p>{sponsor.name}</p>
-                  <span className="edition-page__sponsor-tier">
-                    {SPONSOR_TIER_LABEL[sponsor.tier]}
-                  </span>
-                </article>
-              ))}
-            </div>
-            <a className="concours-page__inline-link edition-page__partner-link" href="/partenariat">
-              Devenir sponsor
-            </a>
-          </div>
-        </section>
-
         <SectionBridge variant="ribbon" />
 
         <section className="concours-page__section">
@@ -462,27 +769,43 @@ export function EditionPage() {
               Parcourez les editions precedentes du concours Miss Tradi Culture.
             </p>
             <div className="edition-page__history">
-              {EDITIONS.filter((e) => e.year !== selectedYear).map((past) => (
-                <article key={past.year} className="edition-page__history-card">
-                  <img src={past.coverImageSrc} alt="" loading="lazy" />
-                  <div>
-                    <h3>{past.title}</h3>
-                    <p>{past.theme}</p>
-                    <ul>
-                      {past.highlights.map((h) => (
-                        <li key={h}>{h}</li>
-                      ))}
-                    </ul>
-                    <button
-                      type="button"
-                      className="edition-page__history-btn"
-                      onClick={() => selectEdition(past.year)}
-                    >
-                      Voir l&apos;edition {past.year}
-                    </button>
-                  </div>
-                </article>
-              ))}
+              {catalog
+                .filter((tab) => tab.editionId !== selectedTab?.editionId)
+                .map((tab) => {
+                  const mockEdition = USE_MOCK_DATA
+                    ? EDITIONS.find((e) => e.year === tab.year)
+                    : null
+                  const nestedCover = resolvedEmission.emission?.editions.find(
+                    (e) => e.id === tab.editionId,
+                  )?.imageUrl
+                  return (
+                    <article key={tab.editionId} className="edition-page__history-card">
+                      <img
+                        src={mockEdition?.coverImageSrc ?? nestedCover ?? '/miss.jpg'}
+                        alt=""
+                        loading="lazy"
+                      />
+                      <div>
+                        <h3>{mockEdition?.title ?? tab.title}</h3>
+                        <p>{mockEdition?.theme ?? tab.title}</p>
+                        {mockEdition && (
+                          <ul>
+                            {mockEdition.highlights.map((h) => (
+                              <li key={h}>{h}</li>
+                            ))}
+                          </ul>
+                        )}
+                        <button
+                          type="button"
+                          className="edition-page__history-btn"
+                          onClick={() => selectEdition(tab.editionId, tab.year)}
+                        >
+                          Voir l&apos;edition {tab.year}
+                        </button>
+                      </div>
+                    </article>
+                  )
+                })}
             </div>
           </div>
         </section>
@@ -497,9 +820,13 @@ export function EditionPage() {
                   Les pre-inscriptions pour l&apos;edition {CURRENT_EDITION_YEAR} sont ouvertes.
                 </p>
                 <div className="concours-page__actions">
-                  <a href="/concours" className="concours-page__btn-primary edition-page__cta">
+                  <button
+                    type="button"
+                    className="concours-page__btn-primary edition-page__cta"
+                    onClick={() => setCandidatureOpen(true)}
+                  >
                     Deposer ma candidature
-                  </a>
+                  </button>
                   <a href="/actualites">Suivre les actualites</a>
                 </div>
               </div>

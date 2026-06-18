@@ -1,4 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { USE_MOCK_DATA } from '../config/app-config'
+import {
+  useEmissionEditionsCatalog,
+  useResolvedEmission,
+} from '../hooks/use-emission-queries'
 import { HeroVideo } from './HeroVideo'
 import { PromoBanner } from './PromoBanner'
 import { SectionBridge } from './SectionBridge'
@@ -56,10 +61,25 @@ const FAQ = [
 
 export function ConcoursPage() {
   const [candidatureOpen, setCandidatureOpen] = useState(false)
+  const resolvedEmission = useResolvedEmission()
+  const catalogQuery = useEmissionEditionsCatalog(
+    USE_MOCK_DATA ? null : (resolvedEmission.emission?.id ?? null),
+  )
+
+  const applyEdition = useMemo(() => {
+    const catalog = catalogQuery.data ?? []
+    return catalog.find((e) => e.status === 'current') ?? catalog[0] ?? null
+  }, [catalogQuery.data])
 
   return (
     <main className="concours-page" aria-labelledby="concours-title">
-      <CandidatureModal open={candidatureOpen} onClose={() => setCandidatureOpen(false)} />
+      <CandidatureModal
+        open={candidatureOpen}
+        onClose={() => setCandidatureOpen(false)}
+        editionId={applyEdition?.editionId ?? null}
+        editionTitle={applyEdition?.title}
+        emissionTitle={resolvedEmission.emission?.title}
+      />
       <HeroVideo />
       <PromoBanner />
       <SectionBridge variant="ribbon" />

@@ -59,80 +59,211 @@
   color: var(--gold-deep);
 }
 
+.edition-page .site-hero-video {
+  height: 100svh;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
 .edition-page__presentation-section {
-  padding-top: 32px;
-  padding-bottom: 32px;
+  padding-top: clamp(30px, 4.5vw, 52px);
+  padding-bottom: clamp(30px, 4.5vw, 52px);
+  background: color-mix(in srgb, var(--bg) 94%, var(--gold) 6%);
 }
 
 .edition-page__presentation {
   width: 100%;
-  max-width: min(1200px, 100% - 32px);
+  max-width: min(1180px, 100% - 32px);
   margin: 0 auto;
   text-align: left;
 }
 
-.edition-page__presentation h2 {
-  margin: 0 0 20px;
-}
-
 .edition-page__presentation-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.15fr);
+  grid-template-columns: minmax(320px, 1.2fr) minmax(280px, 1fr);
   gap: clamp(20px, 3vw, 36px);
-  align-items: stretch;
-  min-height: min(520px, 70vh);
+  align-items: start;
 }
 
 @media (max-width: 900px) {
   .edition-page__presentation-grid {
     grid-template-columns: 1fr;
-    min-height: unset;
   }
 }
 
-.edition-page__presentation-visual {
-  position: relative;
-  min-height: 420px;
+.edition-page__presentation-image-card {
+  border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--border));
   border-radius: 14px;
   overflow: hidden;
-  border: 1px solid var(--border);
   background: color-mix(in srgb, var(--bg) 85%, var(--gold) 15%);
 }
 
-.edition-page__presentation-visual img {
+.edition-page__presentation-image {
   display: block;
   width: 100%;
-  height: 100%;
   min-height: 420px;
+  height: 100%;
   object-fit: cover;
   object-position: center top;
 }
 
-@media (max-width: 900px) {
-  .edition-page__presentation-visual,
-  .edition-page__presentation-visual img {
-    min-height: min(480px, 65vw);
-  }
+.edition-page__presentation-visual-placeholder {
+  min-height: 420px;
+  background: color-mix(in srgb, var(--gold) 12%, var(--social-bg));
 }
 
 .edition-page__presentation-content {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 16px;
-  padding: clamp(12px, 2vw, 20px);
+  gap: 14px;
+  padding: clamp(14px, 2vw, 20px);
   border: 1px solid var(--border);
   border-radius: 14px;
   background: color-mix(in srgb, var(--bg) 94%, var(--gold) 6%);
+  max-width: 100%;
 }
 
-.edition-page__presentation-content .concours-page__eyebrow {
+.edition-page__presentation-eyebrow {
   margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gold-deep);
 }
 
-.edition-page__theme {
-  text-align: center;
-  width: 100%;
+.edition-page__presentation-title {
+  margin: 0;
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  line-height: 1.16;
+  color: var(--text-h);
+}
+
+.edition-page__presentation-vote-line {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gold-deep);
+}
+
+.edition-page__presentation-lead {
+  margin: 0;
+  font-size: clamp(1rem, 1.1vw + 0.85rem, 1.125rem);
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-line;
+}
+
+.edition-page__presentation-sub {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--text-h);
+}
+
+.edition-page__presentation-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.edition-page__presentation-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid color-mix(in srgb, var(--gold) 22%, var(--border));
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--bg) 92%, var(--gold) 8%);
+}
+
+.edition-page__presentation-list li span {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: var(--gold-deep);
+}
+
+.edition-page__presentation-list li strong {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.edition-page__presentation-status {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--border));
+  background: color-mix(in srgb, var(--gold) 10%, var(--bg));
+  color: var(--gold-deep);
+  font-size: 0.86rem;
+}
+
+.edition-page__presentation-sponsors-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.edition-page__presentation-sponsors-inline img {
+  width: 64px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  padding: 4px 6px;
+}
+
+.edition-page__presentation-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.edition-page__presentation-links button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--text-h);
+  background: color-mix(in srgb, var(--gold) 12%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--border));
+}
+
+.edition-page__presentation-links button:hover {
+  color: var(--gold-deep);
+  background: color-mix(in srgb, var(--gold) 18%, var(--bg));
+}
+
+@media (max-width: 900px) {
+  .edition-page__presentation-image-card,
+  .edition-page__presentation-content,
+  .edition-page__presentation-links {
+    width: 100%;
+  }
+
+  .edition-page__presentation-image,
+  .edition-page__presentation-visual-placeholder {
+    min-height: min(420px, 72vw);
+  }
+
+  .edition-page__presentation-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 .edition-page__meta {
@@ -190,119 +321,43 @@
   font-weight: 500;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .edition-page__presentation-section:not(.edition-page__presentation-section--visible)
-    .edition-page__presentation
-    h2 {
-    opacity: 0;
-    transform: translate3d(0, 20px, 0);
-    transition:
-      opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-  }
+/* Animations retirées sur la section présentation */
 
-  .edition-page__presentation-section:not(.edition-page__presentation-section--visible)
-    .edition-page__presentation-visual {
-    opacity: 0;
-    transform: translate3d(-36px, 0, 0) scale(0.98);
-    transition:
-      opacity 0.6s cubic-bezier(0.16, 1, 0.35, 1),
-      transform 0.6s cubic-bezier(0.16, 1, 0.35, 1);
-  }
-
-  .edition-page__presentation-section:not(.edition-page__presentation-section--visible)
-    .edition-page__theme {
-    opacity: 0;
-    transform: translate3d(0, 16px, 0);
-    transition:
-      opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .edition-page__presentation-section:not(.edition-page__presentation-section--visible)
-    .edition-page__meta--presentation
-    .edition-page__meta-card {
-    opacity: 0;
-    transform: translate3d(0, 24px, 0) scale(0.97);
-  }
-
-  @keyframes edition-meta-card-in {
-    from {
-      opacity: 0;
-      transform: translate3d(0, 24px, 0) scale(0.97);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
-  .edition-page__presentation-section:not(.edition-page__presentation-section--visible)
-    .edition-page__presentation-content
-    .edition-page__description {
-    opacity: 0;
-    transform: translate3d(0, 18px, 0);
-    transition:
-      opacity 0.52s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.52s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .edition-page__presentation-section--visible .edition-page__presentation h2 {
-    opacity: 1;
-    transform: none;
-    transition-delay: 0.04s;
-  }
-
-  .edition-page__presentation-section--visible .edition-page__presentation-visual {
-    opacity: 1;
-    transform: none;
-    transition-delay: 0.1s;
-  }
-
-  .edition-page__presentation-section--visible .edition-page__theme {
-    opacity: 1;
-    transform: none;
-    transition-delay: 0.22s;
-  }
-
-  .edition-page__presentation-section--visible .edition-page__meta-card:nth-child(1) {
-    animation: edition-meta-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
-  }
-
-  .edition-page__presentation-section--visible .edition-page__meta-card:nth-child(2) {
-    animation: edition-meta-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.34s both;
-  }
-
-  .edition-page__presentation-section--visible .edition-page__meta-card:nth-child(3) {
-    animation: edition-meta-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
-  }
-
-  .edition-page__presentation-section--visible .edition-page__meta-card:nth-child(4) {
-    animation: edition-meta-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.46s both;
-  }
-
-  .edition-page__presentation-section--visible .edition-page__description {
-    opacity: 1;
-    transform: none;
-    transition-delay: 0.52s;
-  }
-
-  .edition-page__presentation-section--visible
-    .edition-page__meta--presentation
-    .edition-page__meta-card:hover {
-    animation: none;
-    opacity: 1;
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--gold) 40%, var(--border));
-    box-shadow: var(--shadow);
-    transition-delay: 0s;
-  }
+.edition-page__modal-list {
+  display: grid;
+  gap: 10px;
 }
 
-.edition-page__meta--presentation .edition-page__meta-card:hover {
-  transform: translateY(-4px);
-  border-color: color-mix(in srgb, var(--gold) 40%, var(--border));
-  box-shadow: var(--shadow);
+.edition-page__modal-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--bg) 94%, var(--gold) 6%);
+}
+
+.edition-page__modal-item h3 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  color: var(--text-h);
+}
+
+.edition-page__modal-item p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+.edition-page__modal-bullets {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.edition-page__modal-text {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.6;
 }
 
 .edition-page__description {
@@ -312,6 +367,13 @@
   line-height: 1.6;
   font-size: 1rem;
   max-width: none;
+}
+
+.edition-page__description--lead {
+  font-size: clamp(1rem, 1.1vw + 0.85rem, 1.125rem);
+  line-height: 1.7;
+  color: var(--text-h);
+  white-space: pre-line;
 }
 
 .edition-page__section-intro {
@@ -354,6 +416,11 @@
 
 .edition-page__candidates-wrap h2 {
   margin: 0 0 12px;
+}
+
+/* Espace supplémentaire avant la vague candidates → lots */
+.section-bridge--wave.edition-page__bridge--lower {
+  margin-top: clamp(-20px, -2vw, 0px);
 }
 
 .edition-page__candidates-grid {

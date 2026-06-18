@@ -29,7 +29,7 @@ export function AdventureSection() {
             Toutes les étapes et le dossier à fournir sont détaillés dans la
             rubrique concours.
           </p>
-          <a className="adv-section__cta" href="#concours">
+          <a className="adv-section__cta" href="/concours">
             Voir les critères et postuler
           </a>
         </div>

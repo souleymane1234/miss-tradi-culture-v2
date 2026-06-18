@@ -640,3 +640,30 @@
   text-align: center;
   line-height: 1.4;
 }
+
+.vote-page__form-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(180, 30, 30, 0.12);
+  color: #8b1a1a;
+  font-size: 0.88rem;
+}
+
+.vote-page__form-pending {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(40, 120, 60, 0.12);
+  color: #1a5c2e;
+  font-size: 0.88rem;
+}
+
+.edition-page--loading,
+.edition-page--error {
+  min-height: 50vh;
+  display: grid;
+  place-items: center;
+  padding: 48px 24px;
+  text-align: center;
+}

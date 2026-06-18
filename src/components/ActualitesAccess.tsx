@@ -1,7 +1,8 @@
+import { USE_MOCK_NEWS } from '../config/app-config'
+import { isNewsRateLimitError, useNewsApercu } from '../hooks/use-news-queries'
 import { useRevealOnView } from '../hooks/useRevealOnView'
 import './ActualitesAccess.css'
 
-/** Page complète de la rubrique actualités (liste, filtres, etc.). */
 const ACTUALITES_VOIR_PLUS_HREF = '/actualites'
 
 const APERCU_ACTUALITES = [
@@ -45,6 +46,9 @@ const APERCU_ACTUALITES = [
 
 export function ActualitesAccess() {
   const { ref, isVisible } = useRevealOnView<HTMLElement>()
+  const newsQuery = useNewsApercu(3)
+
+  const items = USE_MOCK_NEWS ? [...APERCU_ACTUALITES] : newsQuery.items
 
   return (
     <section
@@ -62,13 +66,25 @@ export function ActualitesAccess() {
             </h2>
           </div>
           <p className="act-access__intro">
-            Annonces officielles, événements et coulisses du concours : tout ce
+            Annonces officielles, événements et coulisses du concours tout ce
             qui compte pour suivre l&apos;aventure au plus près.
           </p>
         </header>
 
+        {newsQuery.isLoading && !USE_MOCK_NEWS ? (
+          <p className="act-access__loading">Chargement des actualites…</p>
+        ) : null}
+
+        {newsQuery.isError && !USE_MOCK_NEWS ? (
+          <p className="act-access__error" role="alert">
+            {isNewsRateLimitError(newsQuery.error)
+              ? 'Actualites temporairement indisponibles (limite serveur). Reessayez dans un instant.'
+              : 'Impossible de charger les actualites pour le moment.'}
+          </p>
+        ) : null}
+
         <ul className="act-access__grid" id="actualites-apercu">
-          {APERCU_ACTUALITES.map((item) => (
+          {items.map((item) => (
             <li key={item.id} className="act-access__card-item">
               <article className="act-access__news-card">
                 <div className="act-access__news-visual">

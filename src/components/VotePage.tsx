@@ -1,13 +1,26 @@
 import { useMemo, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { USE_MOCK_DATA } from '../config/app-config'
 import {
   CURRENT_EDITION_YEAR,
   parseVoteCandidateIdFromPath,
   resolveVoteContext,
 } from '../data/editions'
+import {
+  emissionQueryKeys,
+  useCandidateFromApi,
+  useResolvedEmission,
+} from '../hooks/use-emission-queries'
+import { ApiHttpError, type VotePaymentProvider } from '../lib/api'
+import {
+  mapCandidateDetailToCandidate,
+  mapEditionMetaForVotePage,
+  type VoteEditionView,
+} from '../lib/map-emission'
+import { emissionRequest } from '../lib/emission-request'
 import './ConcoursPage.css'
 import './VotePage.css'
 
-const VOTE_UNIT_PRICE = 10
 const COUNTRY_CODES = ['+225 (CI)', '+226 (BF)', '+223 (ML)'] as const
 
 const MOBILE_OPERATORS = [
@@ -19,14 +32,63 @@ const MOBILE_OPERATORS = [
 
 type OperatorId = (typeof MOBILE_OPERATORS)[number]['id']
 
+function mapMobileMoneyToApiProvider(id: OperatorId): VotePaymentProvider {
+  const map: Record<OperatorId, VotePaymentProvider> = {
+    orange: 'ORANGE',
+    moov: 'MOOV',
+    mtn: 'MTN',
+    wave: 'WAVE',
+  }
+  return map[id]
+}
+
 export function VotePage() {
+  const queryClient = useQueryClient()
   const candidateId = parseVoteCandidateIdFromPath()
-  const context = useMemo(() => resolveVoteContext(candidateId), [candidateId])
+  const mockContext = useMemo(
+    () => (USE_MOCK_DATA ? resolveVoteContext(candidateId) : null),
+    [candidateId],
+  )
+
+  const resolvedEmission = useResolvedEmission()
+  const amountPerVote = resolvedEmission.pointsPerVote
+
+  const apiVote = useCandidateFromApi(USE_MOCK_DATA ? null : candidateId, amountPerVote)
 
   const [countryCode, setCountryCode] = useState<string>(COUNTRY_CODES[0])
   const [phone, setPhone] = useState('')
   const [operator, setOperator] = useState<OperatorId>('mtn')
   const [voteCount, setVoteCount] = useState(1)
+  const [paymentLoading, setPaymentLoading] = useState(false)
+  const [confirmLoading, setConfirmLoading] = useState(false)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [pendingPayment, setPendingPayment] = useState<{
+    transactionId: string
+    voteCount: number
+  } | null>(null)
+
+  const apiContext = useMemo(() => {
+    if (!apiVote.candidateDto) return null
+    const candidate = mapCandidateDetailToCandidate(
+      apiVote.candidateDto,
+      apiVote.rank,
+      amountPerVote,
+    )
+    const edition: VoteEditionView = mapEditionMetaForVotePage(apiVote.candidateDto.edition)
+    return { edition, candidate, rank: apiVote.rank }
+  }, [apiVote.candidateDto, apiVote.rank, amountPerVote])
+
+  const context = USE_MOCK_DATA ? mockContext : apiContext
+
+  if (!USE_MOCK_DATA && apiVote.isLoading) {
+    return (
+      <main className="vote-page vote-page--empty">
+        <div className="vote-page__shell">
+          <p>Chargement de la candidate…</p>
+        </div>
+      </main>
+    )
+  }
 
   if (!context) {
     return (
@@ -44,19 +106,83 @@ export function VotePage() {
 
   const { edition, candidate, rank } = context
   const videoSrc = candidate.videoSrc ?? '/videomiss.mp4'
-  const total = voteCount * VOTE_UNIT_PRICE
+  const total = voteCount * amountPerVote
   const operatorLabel = MOBILE_OPERATORS.find((o) => o.id === operator)?.label ?? ''
   const editionHref = `/edition${edition.year === CURRENT_EDITION_YEAR ? '' : `/${edition.year}`}`
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleInitiatePayment = async () => {
     if (!phone.trim()) {
-      window.alert('Veuillez saisir votre numero de telephone.')
+      setPaymentError('Veuillez saisir votre numero de telephone.')
       return
     }
-    window.alert(
-      `Paiement de ${total} F CFA pour ${voteCount} vote(s) en faveur de ${candidate.name} via ${operatorLabel}.`,
-    )
+    if (!candidateId) return
+
+    if (USE_MOCK_DATA) {
+      window.alert(
+        `Paiement de ${total} F CFA pour ${voteCount} vote(s) en faveur de ${candidate.name} via ${operatorLabel}.`,
+      )
+      return
+    }
+
+    setPaymentError(null)
+    setPaymentLoading(true)
+    try {
+      const digits = phone.replace(/\D/g, '')
+      if (!digits) {
+        setPaymentError('Numero de telephone invalide.')
+        return
+      }
+      const res = await emissionRequest.initiateCandidateVote(candidateId, {
+        voteCount,
+        provider: mapMobileMoneyToApiProvider(operator),
+        amountPerVote,
+        phoneNumber: digits,
+      })
+      const txId = res.data?.id
+      if (!txId) {
+        setPaymentError('Reponse serveur inattendue.')
+        return
+      }
+      setPendingPayment({ transactionId: txId, voteCount })
+      const payUrl = res.data.paymentUrl?.trim()
+      if (payUrl) window.open(payUrl, '_blank', 'noopener,noreferrer')
+    } catch (e) {
+      setPaymentError(
+        e instanceof ApiHttpError ? e.message : 'Le paiement n\'a pas pu etre initie.',
+      )
+    } finally {
+      setPaymentLoading(false)
+    }
+  }
+
+  const handleConfirmVotes = async () => {
+    if (!candidateId || !pendingPayment) return
+    setPaymentError(null)
+    setConfirmLoading(true)
+    try {
+      await emissionRequest.confirmCandidateVote(candidateId, {
+        transactionId: pendingPayment.transactionId,
+        voteCount: pendingPayment.voteCount,
+      })
+      setPendingPayment(null)
+      void queryClient.invalidateQueries({ queryKey: emissionQueryKeys.candidate(candidateId) })
+      window.alert('Votes enregistres avec succes !')
+    } catch (e) {
+      setPaymentError(
+        e instanceof ApiHttpError ? e.message : 'Enregistrement des votes impossible.',
+      )
+    } finally {
+      setConfirmLoading(false)
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (pendingPayment) {
+      void handleConfirmVotes()
+      return
+    }
+    void handleInitiatePayment()
   }
 
   return (
@@ -79,7 +205,7 @@ export function VotePage() {
 
           <section className="vote-page__profile" aria-label="Candidate">
             <div className="vote-page__profile-head">
-              <span className="vote-page__rank">Rang #{rank}</span>
+              <span className="vote-page__rank">Rang #{rank || '—'}</span>
               <h2>{candidate.name}</h2>
               <p className="vote-page__username">@{candidate.username}</p>
             </div>
@@ -102,8 +228,13 @@ export function VotePage() {
               <div className="vote-page__profile-details">
                 <p className="vote-page__bio">{candidate.bio}</p>
                 <p className="vote-page__tradition">
-                  <strong>Tradition :</strong> {candidate.tradition} · {candidate.city},{' '}
-                  {candidate.region} · {candidate.age} ans
+                  <strong>Tradition :</strong> {candidate.tradition}
+                  {candidate.age > 0 ? ` · ${candidate.age} ans` : ''}
+                </p>
+                <p className="vote-page__tradition">
+                  <strong>Origine :</strong> {candidate.region}
+                  {' · '}
+                  <strong>Residence :</strong> {candidate.city}
                 </p>
 
                 <ul className="vote-page__stats">
@@ -121,7 +252,7 @@ export function VotePage() {
                   </li>
                   <li>
                     <span>Rang</span>
-                    <strong>#{rank}</strong>
+                    <strong>#{rank || '—'}</strong>
                   </li>
                 </ul>
               </div>
@@ -138,6 +269,18 @@ export function VotePage() {
                 votes puis valide le paiement.
               </p>
 
+              {paymentError && (
+                <p className="vote-page__form-error" role="alert">
+                  {paymentError}
+                </p>
+              )}
+
+              {pendingPayment && (
+                <p className="vote-page__form-pending" role="status">
+                  Paiement initie. Valide sur ton telephone, puis clique sur « Confirmer les votes ».
+                </p>
+              )}
+
               <form id="vote-form" className="vote-page__form" onSubmit={handleSubmit}>
                 <div className="vote-page__field-row">
                   <label className="vote-page__field">
@@ -145,6 +288,7 @@ export function VotePage() {
                     <select
                       value={countryCode}
                       onChange={(e) => setCountryCode(e.target.value)}
+                      disabled={Boolean(pendingPayment)}
                     >
                       {COUNTRY_CODES.map((code) => (
                         <option key={code} value={code}>
@@ -161,11 +305,12 @@ export function VotePage() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       autoComplete="tel"
+                      disabled={Boolean(pendingPayment)}
                     />
                   </label>
                 </div>
 
-                <fieldset className="vote-page__operators">
+                <fieldset className="vote-page__operators" disabled={Boolean(pendingPayment)}>
                   <legend>Choisis ton Mobile Money</legend>
                   <div className="vote-page__operators-grid">
                     {MOBILE_OPERATORS.map((op) => (
@@ -197,6 +342,7 @@ export function VotePage() {
                         <button
                           type="button"
                           aria-label="Retirer un vote"
+                          disabled={Boolean(pendingPayment)}
                           onClick={() => setVoteCount((n) => Math.max(1, n - 1))}
                         >
                           −
@@ -204,13 +350,16 @@ export function VotePage() {
                         <button
                           type="button"
                           aria-label="Ajouter un vote"
+                          disabled={Boolean(pendingPayment)}
                           onClick={() => setVoteCount((n) => n + 1)}
                         >
                           +
                         </button>
                       </div>
                     </div>
-                    <p className="vote-page__unit-price">Prix unitaire : {VOTE_UNIT_PRICE} F CFA</p>
+                    <p className="vote-page__unit-price">
+                      Prix unitaire : {amountPerVote} F CFA
+                    </p>
                   </div>
 
                   <aside className="vote-page__quiz">
@@ -248,7 +397,7 @@ export function VotePage() {
                 </div>
                 <div>
                   <dt>Prix unitaire</dt>
-                  <dd>{VOTE_UNIT_PRICE} F CFA</dd>
+                  <dd>{amountPerVote} F CFA</dd>
                 </div>
                 <div>
                   <dt>Mobile Money</dt>
@@ -259,8 +408,19 @@ export function VotePage() {
                 <span>Total</span>
                 <strong>{total} F CFA</strong>
               </div>
-              <button type="submit" form="vote-form" className="vote-page__pay-btn">
-                Valider et payer
+              <button
+                type="submit"
+                form="vote-form"
+                className="vote-page__pay-btn"
+                disabled={paymentLoading || confirmLoading}
+              >
+                {pendingPayment
+                  ? confirmLoading
+                    ? 'Confirmation…'
+                    : 'Confirmer les votes'
+                  : paymentLoading
+                    ? 'Paiement en cours…'
+                    : 'Valider et payer'}
               </button>
               <p className="vote-page__recap-note">
                 Paiement securise via Mobile Money (API Miss Track)

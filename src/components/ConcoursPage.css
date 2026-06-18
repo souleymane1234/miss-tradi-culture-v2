@@ -14,6 +14,7 @@
   padding: 26px 16px;
   box-sizing: border-box;
   background: var(--bg);
+  margin-bottom: 20px;
 }
 
 .concours-page__hero {

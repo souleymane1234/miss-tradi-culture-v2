@@ -2,15 +2,24 @@ import './SectionBridge.css'
 
 type SectionBridgeProps = {
   variant?: 'wave' | 'ribbon'
+  className?: string
 }
 
-export function SectionBridge({ variant = 'wave' }: SectionBridgeProps) {
+export function SectionBridge({ variant = 'wave', className }: SectionBridgeProps) {
   if (variant === 'ribbon') {
-    return <div className="section-bridge section-bridge--ribbon" aria-hidden="true" />
+    return (
+      <div
+        className={`section-bridge section-bridge--ribbon${className ? ` ${className}` : ''}`}
+        aria-hidden="true"
+      />
+    )
   }
 
   return (
-    <div className="section-bridge section-bridge--wave" aria-hidden="true">
+    <div
+      className={`section-bridge section-bridge--wave${className ? ` ${className}` : ''}`}
+      aria-hidden="true"
+    >
       <svg
         className="section-bridge__svg"
         xmlns="http://www.w3.org/2000/svg"
