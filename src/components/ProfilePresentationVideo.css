@@ -1,0 +1,17 @@
+.profile-presentation-video {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--border));
+  background: #0a0a0c;
+}
+
+.profile-presentation-video__iframe,
+.profile-presentation-video__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  object-fit: cover;
+  background: #0a0a0c;
+}

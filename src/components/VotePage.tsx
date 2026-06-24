@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { FaLocationDot } from 'react-icons/fa6'
 import { USE_MOCK_DATA } from '../config/app-config'
 import {
   CURRENT_EDITION_YEAR,
@@ -14,10 +15,24 @@ import {
 import { ApiHttpError, type VotePaymentProvider } from '../lib/api'
 import {
   mapCandidateDetailToCandidate,
+  mapEditionDetailForVotePage,
   mapEditionMetaForVotePage,
   type VoteEditionView,
 } from '../lib/map-emission'
-import { emissionRequest } from '../lib/emission-request'
+import { voteRequest } from '../lib/vote-request'
+import { resolveVoteEditionId } from '../lib/vote-navigation'
+import {
+  clampVoteCount,
+  formatVotePaymentError,
+  getVotePhoneExample,
+  getVotePhoneHint,
+  isVoteAmountInvalid,
+  MAX_VOTES_PER_PAYMENT,
+  resolveVoteAmountPerVote,
+  validateVotePhoneForProvider,
+} from '../lib/vote-payment'
+import { isAuthenticated } from '../lib/auth/auth-storage'
+import { EditionVideoPlayer } from './EditionVideoPlayer'
 import './ConcoursPage.css'
 import './VotePage.css'
 
@@ -34,10 +49,10 @@ type OperatorId = (typeof MOBILE_OPERATORS)[number]['id']
 
 function mapMobileMoneyToApiProvider(id: OperatorId): VotePaymentProvider {
   const map: Record<OperatorId, VotePaymentProvider> = {
-    orange: 'ORANGE',
-    moov: 'MOOV',
-    mtn: 'MTN',
-    wave: 'WAVE',
+    orange: 'orangeci',
+    moov: 'moovci',
+    mtn: 'mtnci',
+    wave: 'waveci',
   }
   return map[id]
 }
@@ -45,18 +60,28 @@ function mapMobileMoneyToApiProvider(id: OperatorId): VotePaymentProvider {
 export function VotePage() {
   const queryClient = useQueryClient()
   const candidateId = parseVoteCandidateIdFromPath()
+  const editionId = resolveVoteEditionId(candidateId)
   const mockContext = useMemo(
     () => (USE_MOCK_DATA ? resolveVoteContext(candidateId) : null),
     [candidateId],
   )
 
   const resolvedEmission = useResolvedEmission()
-  const amountPerVote = resolvedEmission.pointsPerVote
+  const pointsPerVote = resolvedEmission.pointsPerVote
 
-  const apiVote = useCandidateFromApi(USE_MOCK_DATA ? null : candidateId, amountPerVote)
+  const apiVote = useCandidateFromApi(
+    USE_MOCK_DATA ? null : candidateId,
+    editionId,
+    pointsPerVote,
+  )
+
+  const voteAmountPerVote = USE_MOCK_DATA
+    ? pointsPerVote
+    : resolveVoteAmountPerVote(apiVote.editionDetail)
 
   const [countryCode, setCountryCode] = useState<string>(COUNTRY_CODES[0])
   const [phone, setPhone] = useState('')
+  const [orangeOtp, setOrangeOtp] = useState('')
   const [operator, setOperator] = useState<OperatorId>('mtn')
   const [voteCount, setVoteCount] = useState(1)
   const [paymentLoading, setPaymentLoading] = useState(false)
@@ -72,13 +97,32 @@ export function VotePage() {
     const candidate = mapCandidateDetailToCandidate(
       apiVote.candidateDto,
       apiVote.rank,
-      amountPerVote,
+      pointsPerVote,
     )
-    const edition: VoteEditionView = mapEditionMetaForVotePage(apiVote.candidateDto.edition)
+    const edition: VoteEditionView = apiVote.editionDetail
+      ? mapEditionDetailForVotePage(apiVote.editionDetail)
+      : mapEditionMetaForVotePage(apiVote.candidateDto.edition)
     return { edition, candidate, rank: apiVote.rank }
-  }, [apiVote.candidateDto, apiVote.rank, amountPerVote])
+  }, [apiVote.candidateDto, apiVote.editionDetail, apiVote.rank, pointsPerVote])
 
   const context = USE_MOCK_DATA ? mockContext : apiContext
+
+  if (!USE_MOCK_DATA && apiVote.missingEditionId) {
+    return (
+      <main className="vote-page vote-page--empty">
+        <div className="vote-page__shell">
+          <h1>Lien de vote incomplet</h1>
+          <p>
+            Ouvrez la page de vote depuis l&apos;edition en cliquant sur le bouton Voter d&apos;une
+            candidate.
+          </p>
+          <a href="/edition" className="vote-page__back-link">
+            Retour aux editions
+          </a>
+        </div>
+      </main>
+    )
+  }
 
   if (!USE_MOCK_DATA && apiVote.isLoading) {
     return (
@@ -105,9 +149,13 @@ export function VotePage() {
   }
 
   const { edition, candidate, rank } = context
+  const photoSrc = candidate.photoSrc?.trim() || '/logo.png'
   const videoSrc = candidate.videoSrc ?? '/videomiss.mp4'
-  const total = voteCount * amountPerVote
+  const total = voteCount * voteAmountPerVote
   const operatorLabel = MOBILE_OPERATORS.find((o) => o.id === operator)?.label ?? ''
+  const apiProvider = mapMobileMoneyToApiProvider(operator)
+  const phoneExample = getVotePhoneExample(apiProvider)
+  const phoneHint = getVotePhoneHint(apiProvider)
   const editionHref = `/edition${edition.year === CURRENT_EDITION_YEAR ? '' : `/${edition.year}`}`
 
   const handleInitiatePayment = async () => {
@@ -117,6 +165,23 @@ export function VotePage() {
     }
     if (!candidateId) return
 
+    if (!USE_MOCK_DATA && !isAuthenticated()) {
+      setPaymentError('Connectez-vous pour initier un paiement de vote.')
+      return
+    }
+
+    if (!USE_MOCK_DATA && isVoteAmountInvalid(voteAmountPerVote, voteCount)) {
+      setPaymentError(
+        'Le tarif de vote de cette edition est invalide (0 F CFA). Verifiez voteAmountPerVote cote API.',
+      )
+      return
+    }
+
+    if (voteCount > MAX_VOTES_PER_PAYMENT) {
+      setPaymentError(`Maximum ${MAX_VOTES_PER_PAYMENT} votes par paiement.`)
+      return
+    }
+
     if (USE_MOCK_DATA) {
       window.alert(
         `Paiement de ${total} F CFA pour ${voteCount} vote(s) en faveur de ${candidate.name} via ${operatorLabel}.`,
@@ -124,19 +189,29 @@ export function VotePage() {
       return
     }
 
+    if (operator === 'orange' && !orangeOtp.trim()) {
+      setPaymentError('Saisissez le code OTP recu par SMS pour Orange Money.')
+      return
+    }
+
     setPaymentError(null)
     setPaymentLoading(true)
     try {
-      const digits = phone.replace(/\D/g, '')
-      if (!digits) {
-        setPaymentError('Numero de telephone invalide.')
+      const phoneValidation = validateVotePhoneForProvider(phone, countryCode, apiProvider)
+      if ('error' in phoneValidation) {
+        setPaymentError(phoneValidation.error)
         return
       }
-      const res = await emissionRequest.initiateCandidateVote(candidateId, {
-        voteCount,
-        provider: mapMobileMoneyToApiProvider(operator),
-        amountPerVote,
-        phoneNumber: digits,
+      const otp = orangeOtp.replace(/\D/g, '')
+      if (operator === 'orange' && otp.length < 4) {
+        setPaymentError('Le code OTP Orange Money est invalide.')
+        return
+      }
+      const res = await voteRequest.initiatePayment(candidateId, {
+        voteCount: clampVoteCount(voteCount),
+        provider: apiProvider,
+        phoneNumber: phoneValidation.phone,
+        otp: operator === 'orange' ? otp : undefined,
       })
       const txId = res.data?.id
       if (!txId) {
@@ -148,7 +223,7 @@ export function VotePage() {
       if (payUrl) window.open(payUrl, '_blank', 'noopener,noreferrer')
     } catch (e) {
       setPaymentError(
-        e instanceof ApiHttpError ? e.message : 'Le paiement n\'a pas pu etre initie.',
+        formatVotePaymentError(e, 'Le paiement n\'a pas pu etre initie.'),
       )
     } finally {
       setPaymentLoading(false)
@@ -160,7 +235,7 @@ export function VotePage() {
     setPaymentError(null)
     setConfirmLoading(true)
     try {
-      await emissionRequest.confirmCandidateVote(candidateId, {
+      await voteRequest.confirmPayment(candidateId, {
         transactionId: pendingPayment.transactionId,
         voteCount: pendingPayment.voteCount,
       })
@@ -193,70 +268,78 @@ export function VotePage() {
         </a>
 
         <div className="vote-page__stack">
-          <section className="vote-page__edition-block" aria-label="Edition">
-            <p className="vote-page__eyebrow">Edition {edition.year}</p>
-            <h1 className="vote-page__edition-title">{edition.title}</h1>
-            <p className="vote-page__edition-theme">{edition.theme}</p>
-            <p className="vote-page__edition-meta">
-              {edition.dates} · {edition.location}
-            </p>
-            <p className="vote-page__edition-desc">{edition.tagline}</p>
-          </section>
+          <section className="vote-page__hero" aria-label="Profil de la candidate">
+            <img className="vote-page__hero-bg" src={photoSrc} alt="" aria-hidden="true" />
+            <div className="vote-page__hero-overlay" aria-hidden="true" />
 
-          <section className="vote-page__profile" aria-label="Candidate">
-            <div className="vote-page__profile-head">
-              <span className="vote-page__rank">Rang #{rank || '—'}</span>
-              <h2>{candidate.name}</h2>
-              <p className="vote-page__username">@{candidate.username}</p>
-            </div>
+            <div className="vote-page__hero-inner">
+              <div className="vote-page__badges">
+                <span className="vote-page__badge">Edition {edition.year}</span>
+                {rank > 0 && <span className="vote-page__badge">Top {rank}</span>}
+              </div>
 
-            <div className="vote-page__profile-body">
-              <div className="vote-page__media">
-                <img src={candidate.photoSrc} alt={candidate.name} className="vote-page__photo" />
-                <div className="vote-page__video-box">
-                  <video
-                    src={videoSrc}
-                    poster={candidate.photoSrc}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    className="vote-page__video"
-                  />
+              <div className="vote-page__identity">
+                <img
+                  className="vote-page__identity-photo"
+                  src={photoSrc}
+                  alt={`Photo de ${candidate.name}`}
+                  width={120}
+                  height={120}
+                />
+                <div className="vote-page__identity-text">
+                  <h1 className="vote-page__name">{candidate.name}</h1>
+                  <p className="vote-page__username">@{candidate.username}</p>
+                  <p className="vote-page__location">
+                    <FaLocationDot aria-hidden="true" />
+                    <span>
+                      {candidate.city}
+                      {candidate.region && candidate.region !== candidate.city
+                        ? ` · ${candidate.region}`
+                        : ''}
+                    </span>
+                  </p>
+                  {candidate.bio?.trim() && (
+                    <p className="vote-page__tagline">{candidate.bio}</p>
+                  )}
+                  <p className="vote-page__meta-line">
+                    <strong>Tradition :</strong> {candidate.tradition}
+                    {candidate.age > 0 ? ` · ${candidate.age} ans` : ''}
+                  </p>
+                  <p className="vote-page__meta-line">
+                    <strong>Categorie :</strong> {candidate.mentorName}
+                    {' · '}
+                    <strong>Tag :</strong> {candidate.mentorSubtitle}
+                  </p>
                 </div>
               </div>
 
-              <div className="vote-page__profile-details">
-                <p className="vote-page__bio">{candidate.bio}</p>
-                <p className="vote-page__tradition">
-                  <strong>Tradition :</strong> {candidate.tradition}
-                  {candidate.age > 0 ? ` · ${candidate.age} ans` : ''}
-                </p>
-                <p className="vote-page__tradition">
-                  <strong>Origine :</strong> {candidate.region}
-                  {' · '}
-                  <strong>Residence :</strong> {candidate.city}
-                </p>
-
-                <ul className="vote-page__stats">
-                  <li>
-                    <span>Points total</span>
-                    <strong>{candidate.points}</strong>
-                  </li>
-                  <li>
-                    <span>Points quiz</span>
-                    <strong>{candidate.quizPoints}</strong>
-                  </li>
-                  <li>
-                    <span>Votes</span>
-                    <strong>{candidate.votes}</strong>
-                  </li>
-                  <li>
-                    <span>Rang</span>
-                    <strong>#{rank || '—'}</strong>
-                  </li>
-                </ul>
-              </div>
+              <ul className="vote-page__hero-stats">
+                <li>
+                  <strong>{candidate.votes}</strong>
+                  <span>Votes</span>
+                </li>
+                <li>
+                  <strong>{candidate.quizPoints}</strong>
+                  <span>Points quiz</span>
+                </li>
+                <li>
+                  <strong>#{rank || '—'}</strong>
+                  <span>Classement</span>
+                </li>
+              </ul>
             </div>
+          </section>
+
+          <section className="vote-page__presentation" aria-label="Video de presentation">
+            <h2 className="vote-page__presentation-title">Video de presentation</h2>
+            <EditionVideoPlayer
+              video={{
+                url: videoSrc,
+                title: candidate.name,
+                thumbnailUrl: photoSrc,
+              }}
+              poster={photoSrc}
+            />
           </section>
 
           <section className="vote-page__checkout" aria-labelledby="vote-form-title">
@@ -265,9 +348,17 @@ export function VotePage() {
                 Vote pour ton favori
               </h2>
               <p className="vote-page__form-intro">
-                Saisis ton numero, choisis ton operateur Mobile Money, selectionne le nombre de
-                votes puis valide le paiement.
+                Entre ton numero, choisis l&apos;operateur et le nombre de votes. Le paiement
+                s&apos;ouvre dans un nouvel onglet si une URL est fournie ; valide ensuite tes
+                votes une fois le paiement reussi.
               </p>
+
+              {!USE_MOCK_DATA && voteAmountPerVote <= 0 && (
+                <p className="vote-page__form-error" role="alert">
+                  Le tarif de vote de cette edition est a 0 F CFA. Le paiement sera refuse par
+                  l&apos;API tant que voteAmountPerVote n&apos;est pas configure sur l&apos;edition.
+                </p>
+              )}
 
               {paymentError && (
                 <p className="vote-page__form-error" role="alert">
@@ -301,7 +392,7 @@ export function VotePage() {
                     <span>Numero de telephone</span>
                     <input
                       type="tel"
-                      placeholder="Ex: 0700000000"
+                      placeholder={`Ex: ${phoneExample}`}
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       autoComplete="tel"
@@ -309,6 +400,8 @@ export function VotePage() {
                     />
                   </label>
                 </div>
+
+                <p className="vote-page__phone-hint">{phoneHint}</p>
 
                 <fieldset className="vote-page__operators" disabled={Boolean(pendingPayment)}>
                   <legend>Choisis ton Mobile Money</legend>
@@ -318,7 +411,11 @@ export function VotePage() {
                         key={op.id}
                         type="button"
                         className={`vote-page__operator${operator === op.id ? ' vote-page__operator--active' : ''}`}
-                        onClick={() => setOperator(op.id)}
+                        onClick={() => {
+                          setOperator(op.id)
+                          if (op.id !== 'orange') setOrangeOtp('')
+                          setPaymentError(null)
+                        }}
                       >
                         <span className="vote-page__operator-logo">
                           <img src={op.logo} alt="" />
@@ -328,10 +425,29 @@ export function VotePage() {
                     ))}
                   </div>
                   <p className="vote-page__operator-note">
-                    Orange Money peut demander un OTP non gere sur ce site. Pour un paiement plus
-                    fluide, privilegie Moov, MTN ou Wave.
+                    Orange Money necessite le code OTP recu par SMS. MTN, Moov et Wave ne
+                    demandent pas d&apos;OTP sur cette page.
                   </p>
                 </fieldset>
+
+                {operator === 'orange' && (
+                  <label className="vote-page__field vote-page__field--otp">
+                    <span>Code OTP Orange Money</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      placeholder="Ex: 123456"
+                      value={orangeOtp}
+                      onChange={(e) => setOrangeOtp(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                      disabled={Boolean(pendingPayment)}
+                      maxLength={8}
+                    />
+                    <span className="vote-page__field-hint">
+                      Saisissez le code a usage unique envoye sur votre telephone Orange.
+                    </span>
+                  </label>
+                )}
 
                 <div className="vote-page__votes-row">
                   <div className="vote-page__votes-box">
@@ -343,22 +459,22 @@ export function VotePage() {
                           type="button"
                           aria-label="Retirer un vote"
                           disabled={Boolean(pendingPayment)}
-                          onClick={() => setVoteCount((n) => Math.max(1, n - 1))}
+                          onClick={() => setVoteCount((n) => clampVoteCount(n - 1))}
                         >
                           −
                         </button>
                         <button
                           type="button"
                           aria-label="Ajouter un vote"
-                          disabled={Boolean(pendingPayment)}
-                          onClick={() => setVoteCount((n) => n + 1)}
+                          disabled={Boolean(pendingPayment) || voteCount >= MAX_VOTES_PER_PAYMENT}
+                          onClick={() => setVoteCount((n) => clampVoteCount(n + 1))}
                         >
                           +
                         </button>
                       </div>
                     </div>
                     <p className="vote-page__unit-price">
-                      Prix unitaire : {amountPerVote} F CFA
+                      Prix unitaire : {voteAmountPerVote} F CFA · max {MAX_VOTES_PER_PAYMENT} votes
                     </p>
                   </div>
 
@@ -377,6 +493,13 @@ export function VotePage() {
             </div>
 
             <aside className="vote-page__recap" aria-labelledby="vote-recap-title">
+              <div className="vote-page__recap-candidate">
+                <img src={photoSrc} alt="" width={56} height={56} />
+                <div>
+                  <strong>{candidate.name}</strong>
+                  <span>@{candidate.username}</span>
+                </div>
+              </div>
               <h2 id="vote-recap-title">Recapitulatif</h2>
               <dl className="vote-page__recap-list">
                 <div>
@@ -385,7 +508,7 @@ export function VotePage() {
                 </div>
                 <div>
                   <dt>Candidate</dt>
-                  <dd>{candidate.username}</dd>
+                  <dd>{candidate.name}</dd>
                 </div>
                 <div>
                   <dt>Numero</dt>
@@ -397,7 +520,7 @@ export function VotePage() {
                 </div>
                 <div>
                   <dt>Prix unitaire</dt>
-                  <dd>{amountPerVote} F CFA</dd>
+                  <dd>{voteAmountPerVote} F CFA</dd>
                 </div>
                 <div>
                   <dt>Mobile Money</dt>

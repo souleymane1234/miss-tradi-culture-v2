@@ -62,6 +62,14 @@ export function Navbar() {
   const isPartenariatPage = pathname.startsWith('/partenariat')
   const isVotePage = pathname.startsWith('/vote')
   const isProfilPage = pathname.startsWith('/profil')
+  const isMentionsLegalesPage =
+    pathname === '/mentions-legales' || pathname === '/mentions-legales/'
+  const isCGUPage = pathname === '/cgu' || pathname === '/cgu/'
+  const isPolitiqueCookiesPage =
+    pathname === '/politique-cookies' || pathname === '/politique-cookies/'
+  const isPolitiqueConfidentialitePage =
+    pathname === '/politique-confidentialite' ||
+    pathname === '/politique-confidentialite/'
   const homePrefix =
     isActualitesPage ||
     isConcoursPage ||
@@ -69,7 +77,11 @@ export function Navbar() {
     isPlayPage ||
     isPartenariatPage ||
     isVotePage ||
-    isProfilPage
+    isProfilPage ||
+    isMentionsLegalesPage ||
+    isCGUPage ||
+    isPolitiqueCookiesPage ||
+    isPolitiqueConfidentialitePage
       ? '/#'
       : '#'
   useEffect(() => {
@@ -102,6 +114,10 @@ export function Navbar() {
     isPartenariatPage ||
     isVotePage ||
     isProfilPage ||
+    isMentionsLegalesPage ||
+    isCGUPage ||
+    isPolitiqueCookiesPage ||
+    isPolitiqueConfidentialitePage ||
     scrolled ||
     menuOpen
 

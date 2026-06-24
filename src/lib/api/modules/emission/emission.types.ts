@@ -179,6 +179,7 @@ export interface EmissionNestedEditionDto {
   imageUrl?: string | null;
   candidaturePrice?: number | null;
   quizPrice?: number | null;
+  voteAmountPerVote?: number | null;
   quizEnabled?: boolean;
   dailyFreeQuizAttempts?: number;
   requireDocuments?: boolean;
@@ -244,6 +245,7 @@ export interface EmissionActiveEditionDto {
   title: string;
   candidaturePrice?: number | null;
   quizPrice?: number | null;
+  voteAmountPerVote?: number | null;
   quizEnabled?: boolean;
   dailyFreeQuizAttempts?: number;
   requireDocuments?: boolean;
@@ -270,6 +272,7 @@ export interface EmissionEditionListItemDto {
   imageUrl?: string | null;
   candidaturePrice?: number | null;
   quizPrice?: number | null;
+  voteAmountPerVote?: number | null;
   quizEnabled?: boolean;
   dailyFreeQuizAttempts?: number;
   requireDocuments?: boolean;
@@ -469,6 +472,7 @@ export interface EditionFullDetailDto {
   imageUrl?: string | null;
   candidaturePrice?: number | null;
   quizPrice?: number | null;
+  voteAmountPerVote?: number | null;
   quizEnabled?: boolean;
   dailyFreeQuizAttempts?: number;
   requireDocuments?: boolean;
@@ -514,6 +518,7 @@ export interface EditionRankingEditionMetaDto {
   imageUrl?: string | null;
   candidaturePrice?: number | null;
   quizPrice?: number | null;
+  voteAmountPerVote?: number | null;
   quizEnabled?: boolean;
   dailyFreeQuizAttempts?: number;
   requireDocuments?: boolean;
@@ -602,54 +607,4 @@ export interface EditionCandidatesEnvelopeDto {
   message: string;
   data: EditionCandidatesDataDto;
   pagination: ApiPaginationDto;
-}
-
-/** POST …/candidates/:id/vote/initiate */
-export type VotePaymentProvider = "MTN" | "MOOV" | "WAVE" | "ORANGE";
-
-export interface VoteInitiateBodyDto {
-  voteCount: number;
-  provider: VotePaymentProvider;
-  amountPerVote: number;
-  phoneNumber: string;
-}
-
-export interface VoteInitiateTransactionDto {
-  id: string;
-  transactionType: string;
-  provider: string;
-  amount: number;
-  status: string;
-  reference: string;
-  phoneNumber: string;
-  paymentUrl?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface VoteInitiateEnvelopeDto {
-  success: boolean;
-  message: string;
-  data: VoteInitiateTransactionDto;
-}
-
-/** POST …/candidates/:id/vote */
-export interface VoteConfirmBodyDto {
-  transactionId: string;
-  voteCount: number;
-}
-
-export interface VoteRecordDto {
-  id: string;
-  editionId: string;
-  candidateId: string;
-  userId: string;
-  transactionId: string;
-  createdAt: string;
-}
-
-export interface VoteConfirmEnvelopeDto {
-  success: boolean;
-  message: string;
-  data: VoteRecordDto[];
 }

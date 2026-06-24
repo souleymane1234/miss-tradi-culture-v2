@@ -25,6 +25,15 @@ export interface AuthUserDto {
   firstName?: string | null
   lastName?: string | null
   profileImage?: string | null
+  coverImage?: string | null
+  bio?: string | null
+  videoPresentationUrl?: string | null
+  gender?: string | null
+  nationality?: string | null
+  address?: string | null
+  interests?: string[] | null
+  socialLinks?: { platform: string; url: string }[] | null
+  academicLevel?: string | null
   dateOfBirth?: string | null
   city?: string | null
   country?: string | null

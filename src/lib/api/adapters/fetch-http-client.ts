@@ -40,6 +40,44 @@ function joinUrl(baseUrl: string, path: string): string {
   return `${baseUrl}${p}`;
 }
 
+function logOutgoingApiRequest(
+  method: HttpRequest["method"],
+  url: string,
+  input: HttpRequest,
+  options: {
+    hasBody: boolean;
+    isFormData: boolean;
+    rawBody: unknown;
+    hasAuth: boolean;
+  },
+): void {
+  if (!import.meta.env.DEV) return
+
+  const payload: Record<string, unknown> = {
+    method,
+    url,
+  }
+
+  if (input.query && Object.keys(input.query).length > 0) {
+    payload.query = input.query
+  }
+
+  if (options.hasAuth) {
+    payload.auth = 'Bearer ***'
+  }
+
+  if (options.hasBody) {
+    if (options.isFormData) {
+      payload.body = '[FormData]'
+    } else {
+      payload.body = options.rawBody
+      payload.bodyJson = JSON.stringify(options.rawBody)
+    }
+  }
+
+  console.info('[API →]', payload)
+}
+
 async function readJsonSafely(response: Response): Promise<unknown> {
   const text = await response.text();
   if (!text) return undefined;
@@ -131,6 +169,13 @@ export function createFetchHttpClient(options: FetchHttpClientOptions): HttpClie
             : JSON.stringify(rawBody)
           : undefined;
 
+        logOutgoingApiRequest(input.method, url, input, {
+          hasBody,
+          isFormData,
+          rawBody,
+          hasAuth: Boolean(bearerToken),
+        })
+
         let response: Response;
         try {
           response = await fetchFn(url, {
@@ -184,6 +229,14 @@ export function createFetchHttpClient(options: FetchHttpClientOptions): HttpClie
         clearTimeout(timeout);
 
         if (!response.ok) {
+          if (import.meta.env.DEV) {
+            console.error('[API ←]', {
+              method: input.method,
+              url,
+              status: response.status,
+              body,
+            })
+          }
           throwApiError(response, body, url, input.method);
         }
 

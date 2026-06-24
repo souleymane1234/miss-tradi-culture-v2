@@ -28,25 +28,25 @@ const REGISTER_CONSENT_ITEMS = [
     key: 'cgu' as const,
     text: "J'accepte les Conditions Generales d'Utilisation et je declare en avoir pris connaissance*",
     linkLabel: 'Lire les CGU',
-    href: '/#contact',
+    href: '/cgu',
   },
   {
     key: 'privacy' as const,
     text: "J'accepte la politique de confidentialite et je declare en avoir pris connaissance*",
     linkLabel: 'Lire la politique de confidentialite',
-    href: '/#contact',
+    href: '/politique-confidentialite',
   },
   {
     key: 'cookies' as const,
     text: "J'accepte la politique de cookies et je declare en avoir pris connaissance*",
     linkLabel: 'Lire la politique de cookies',
-    href: '/#contact',
+    href: '/politique-cookies',
   },
   {
     key: 'media' as const,
     text: "J'autorise MISS TRADI CULTURE et partenaires a utiliser mes images et mes videos et leur garanti contre toutes reclamations provenant des droits des tiers*",
     linkLabel: 'Lire les mentions legales',
-    href: '/#contact',
+    href: '/mentions-legales',
   },
 ] as const
 

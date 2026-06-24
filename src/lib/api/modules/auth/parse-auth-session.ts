@@ -1,4 +1,5 @@
 import type { AuthSessionDto, AuthUserDto } from './auth.types'
+import { parseSocialLinks } from '../profile/parse-student-profile'
 
 function readToken(obj: Record<string, unknown>, key: string): string | null {
   const value = obj[key]
@@ -20,6 +21,17 @@ function parseAuthUser(value: unknown): AuthUserDto | null {
     firstName: typeof o.firstName === 'string' ? o.firstName : null,
     lastName: typeof o.lastName === 'string' ? o.lastName : null,
     profileImage: typeof o.profileImage === 'string' ? o.profileImage : null,
+    coverImage: typeof o.coverImage === 'string' ? o.coverImage : null,
+    bio: typeof o.bio === 'string' ? o.bio : null,
+    videoPresentationUrl: typeof o.videoPresentationUrl === 'string' ? o.videoPresentationUrl : null,
+    gender: typeof o.gender === 'string' ? o.gender : null,
+    nationality: typeof o.nationality === 'string' ? o.nationality : null,
+    address: typeof o.address === 'string' ? o.address : null,
+    interests: Array.isArray(o.interests)
+      ? o.interests.filter((item): item is string => typeof item === 'string')
+      : null,
+    socialLinks: parseSocialLinks(o.socialLinks ?? o.socialLink) ?? null,
+    academicLevel: typeof o.academicLevel === 'string' ? o.academicLevel : null,
     dateOfBirth: typeof o.dateOfBirth === 'string' ? o.dateOfBirth : null,
     city: typeof o.city === 'string' ? o.city : null,
     country: typeof o.country === 'string' ? o.country : null,

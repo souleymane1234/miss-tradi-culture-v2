@@ -39,199 +39,194 @@
   gap: 24px;
 }
 
-.vote-page__edition-block,
-.vote-page__profile,
+.vote-page__hero,
+.vote-page__presentation,
 .vote-page__checkout {
   border-radius: 14px;
   border: 1px solid var(--border);
   box-sizing: border-box;
 }
 
-.vote-page__edition-block {
-  padding: 24px;
-  background: color-mix(in srgb, var(--gold) 10%, var(--bg));
-  border-color: color-mix(in srgb, var(--gold) 35%, var(--border));
+/* Hero candidate */
+.vote-page__hero {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--gold) 30%, var(--border));
+  background: #0a0a0c;
 }
 
-.vote-page__eyebrow {
-  margin: 0 0 8px;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--gold-deep);
-  font-weight: 700;
+.vote-page__hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(14px);
+  transform: scale(1.08);
+  opacity: 0.55;
 }
 
-.vote-page__edition-title {
-  margin: 0 0 6px;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  line-height: 1.15;
-  color: var(--text-h);
-  font-weight: 600;
+.vote-page__hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, #0a0a0c 35%, transparent) 0%,
+    color-mix(in srgb, #0a0a0c 88%, transparent) 55%,
+    #0a0a0c 100%
+  );
 }
 
-.vote-page__edition-theme {
-  margin: 0 0 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--gold-deep);
-}
-
-.vote-page__edition-meta {
-  margin: 0 0 10px;
-  font-size: 0.9rem;
-  color: var(--text);
-}
-
-.vote-page__edition-desc {
-  margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.55;
-  color: var(--text);
-  max-width: 72ch;
-}
-
-/* Bloc candidate */
-.vote-page__profile {
+.vote-page__hero-inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-  background: color-mix(in srgb, var(--bg) 92%, var(--gold) 8%);
-}
-
-.vote-page__profile-head h2 {
-  margin: 4px 0 2px;
-  font-size: clamp(1.35rem, 2vw, 1.65rem);
-  line-height: 1.15;
-  color: var(--text-h);
-}
-
-.vote-page__profile-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
   gap: 20px;
-  align-items: start;
+  padding: 28px 24px;
 }
 
-@media (max-width: 800px) {
-  .vote-page__profile-body {
-    grid-template-columns: 1fr;
-  }
-}
-
-.vote-page__profile-details {
+.vote-page__badges {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.vote-page__rank {
-  display: inline-block;
-  padding: 4px 10px;
+.vote-page__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--gold-deep);
-  border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--border));
-  background: color-mix(in srgb, var(--gold) 14%, var(--bg));
+  color: #fff;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  background: color-mix(in srgb, var(--gold) 22%, #0a0a0c);
+}
+
+.vote-page__identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.vote-page__identity-photo {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--gold);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  background: #1a1a1f;
+}
+
+.vote-page__identity-text {
+  flex: 1;
+  min-width: 220px;
+}
+
+.vote-page__name {
+  margin: 0 0 4px;
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  line-height: 1.1;
+  color: #fff;
+  font-weight: 600;
 }
 
 .vote-page__username {
-  margin: 0;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--gold-deep);
-}
-
-.vote-page__media {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr;
-  gap: 10px;
-  min-height: 200px;
-}
-
-@media (max-width: 500px) {
-  .vote-page__media {
-    grid-template-columns: 1fr;
-  }
-}
-
-.vote-page__photo {
-  width: 100%;
-  height: 100%;
-  min-height: 200px;
-  object-fit: cover;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-}
-
-.vote-page__video-box {
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: #0a0a0c;
-  min-height: 200px;
-}
-
-.vote-page__video {
-  display: block;
-  width: 100%;
-  height: 100%;
-  min-height: 200px;
-  object-fit: cover;
-}
-
-.vote-page__bio {
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 0.9rem;
-  line-height: 1.55;
-  color: var(--text);
-  flex: 1;
+  font-weight: 600;
+  color: var(--gold-light);
 }
 
-.vote-page__tradition {
-  margin: 0;
+.vote-page__location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+  font-size: 0.92rem;
+  color: color-mix(in srgb, #fff 82%, transparent);
+}
+
+.vote-page__location svg {
+  flex-shrink: 0;
+  color: var(--gold);
+}
+
+.vote-page__tagline {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, #fff 88%, transparent);
+  max-width: 60ch;
+}
+
+.vote-page__meta-line {
+  margin: 0 0 6px;
   font-size: 0.85rem;
-  color: var(--text);
   line-height: 1.45;
+  color: color-mix(in srgb, #fff 75%, transparent);
 }
 
-.vote-page__tradition strong {
-  color: var(--text-h);
+.vote-page__meta-line strong {
+  color: #fff;
 }
 
-.vote-page__stats {
+.vote-page__hero-stats {
   margin: 0;
   padding: 0;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }
 
-.vote-page__stats li {
-  padding: 12px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--bg);
+@media (max-width: 560px) {
+  .vote-page__hero-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vote-page__hero-stats li {
+  padding: 14px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--border));
+  background: color-mix(in srgb, #fff 6%, #0a0a0c);
   text-align: center;
 }
 
-.vote-page__stats span {
+.vote-page__hero-stats strong {
   display: block;
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--gold-deep);
-  font-weight: 700;
+  font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+  color: #fff;
+  line-height: 1.1;
   margin-bottom: 4px;
 }
 
-.vote-page__stats strong {
-  font-size: 1.15rem;
+.vote-page__hero-stats span {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gold-light);
+  font-weight: 700;
+}
+
+.vote-page__presentation {
+  padding: 20px;
+  background: color-mix(in srgb, var(--bg) 92%, var(--gold) 8%);
+  border-color: color-mix(in srgb, var(--gold) 25%, var(--border));
+}
+
+.vote-page__presentation-title {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  font-weight: 600;
   color: var(--text-h);
 }
 
@@ -384,6 +379,33 @@
   border-color: var(--gold);
   background: color-mix(in srgb, var(--gold) 14%, var(--bg));
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 30%, transparent);
+}
+
+.vote-page__phone-hint {
+  margin: -8px 0 0;
+  font-size: 0.78rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.vote-page__field--otp {
+  max-width: 320px;
+}
+
+.vote-page__field-hint {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.vote-page__operator--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.vote-page__operator--disabled:hover {
+  border-color: var(--border);
 }
 
 .vote-page__operator-logo {
@@ -549,6 +571,38 @@
   border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--border));
   background: color-mix(in srgb, var(--gold) 8%, var(--bg));
   box-shadow: var(--shadow);
+}
+
+.vote-page__recap-candidate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.vote-page__recap-candidate img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid color-mix(in srgb, var(--gold) 45%, var(--border));
+  flex-shrink: 0;
+}
+
+.vote-page__recap-candidate strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text-h);
+  line-height: 1.25;
+}
+
+.vote-page__recap-candidate span {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--gold-deep);
+  font-weight: 600;
 }
 
 .vote-page__recap h2 {

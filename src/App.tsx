@@ -15,6 +15,10 @@ import { OfficialAppPromo } from './components/OfficialAppPromo'
 import { PromoBanner } from './components/PromoBanner'
 import { SectionBridge } from './components/SectionBridge'
 import { ProfilePage } from './components/ProfilePage'
+import { MentionsLegalesPage } from './components/MentionsLegalesPage'
+import { CGUPage } from './components/CGUPage'
+import { PolitiqueCookiesPage } from './components/PolitiqueCookiesPage'
+import { PolitiqueConfidentialitePage } from './components/PolitiqueConfidentialitePage'
 import { Footer } from './components/Footer'
 import './App.css'
 
@@ -29,6 +33,17 @@ function App() {
   const isVotePage = window.location.pathname.startsWith('/vote')
   const isPlayPage = window.location.pathname.startsWith('/play')
   const isProfilPage = window.location.pathname.startsWith('/profil')
+  const isMentionsLegalesPage =
+    window.location.pathname === '/mentions-legales' ||
+    window.location.pathname === '/mentions-legales/'
+  const isCGUPage =
+    window.location.pathname === '/cgu' || window.location.pathname === '/cgu/'
+  const isPolitiqueCookiesPage =
+    window.location.pathname === '/politique-cookies' ||
+    window.location.pathname === '/politique-cookies/'
+  const isPolitiqueConfidentialitePage =
+    window.location.pathname === '/politique-confidentialite' ||
+    window.location.pathname === '/politique-confidentialite/'
 
   if (isProfilPage) {
     return (
@@ -112,6 +127,50 @@ function App() {
       <>
         <Navbar />
         <PlayPage />
+      </>
+    )
+  }
+
+  if (isMentionsLegalesPage) {
+    return (
+      <>
+        <Navbar />
+        <MentionsLegalesPage />
+        <div className="ticks"></div>
+        <Footer />
+      </>
+    )
+  }
+
+  if (isCGUPage) {
+    return (
+      <>
+        <Navbar />
+        <CGUPage />
+        <div className="ticks"></div>
+        <Footer />
+      </>
+    )
+  }
+
+  if (isPolitiqueCookiesPage) {
+    return (
+      <>
+        <Navbar />
+        <PolitiqueCookiesPage />
+        <div className="ticks"></div>
+        <Footer />
+      </>
+    )
+  }
+
+  if (isPolitiqueConfidentialitePage) {
+    return (
+      <>
+        <Navbar />
+        <PolitiqueConfidentialitePage />
+        <div className="ticks"></div>
+        <Footer />
       </>
     )
   }

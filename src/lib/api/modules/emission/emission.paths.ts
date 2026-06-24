@@ -11,9 +11,6 @@ export const EMISSION_API_PATHS = {
   /** POST candidature à une édition (Bearer requis). */
   editionApply: (editionId: string) =>
     `/api/v1/emission/editions/${encodeURIComponent(editionId)}/apply`,
-  /** Classement paginé des candidates (rangs serveur). */
-  editionRanking: (editionId: string) =>
-    `/api/v1/emission/editions/${encodeURIComponent(editionId)}/ranking`,
   /** Liste paginée des candidates d'une édition (status, catégorie, tag). */
   editionCandidates: (editionId: string) =>
     `/api/v1/emission/editions/${encodeURIComponent(editionId)}/candidates`,
@@ -32,10 +29,6 @@ export const EMISSION_API_PATHS = {
   /** Détail d’une candidature par son id (lien /vote/:id sans query). */
   candidateById: (candidateId: string) =>
     `/api/v1/emission/candidates/${encodeURIComponent(candidateId)}`,
-  candidateVoteInitiate: (candidateId: string) =>
-    `/api/v1/emission/candidates/${encodeURIComponent(candidateId)}/vote/initiate`,
-  candidateVoteConfirm: (candidateId: string) =>
-    `/api/v1/emission/candidates/${encodeURIComponent(candidateId)}/vote`,
   peopleGroups: () => "/api/v1/emission/referentiel/people-groups",
   categories: () => "/api/v1/emission/referentiel/categories",
   tags: () => "/api/v1/emission/referentiel/tags",

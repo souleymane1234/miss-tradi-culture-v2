@@ -9,9 +9,11 @@ import {
   createAuthApi,
   createEmissionApi,
   createNewsApi,
+  createProfileApi,
   createReferentielApi,
   createUploadApi,
   createVideoApi,
+  createVoteApi,
 } from '../lib/api'
 
 const httpClient = createAppHttpClient({
@@ -43,7 +45,9 @@ function httpClientDefaultHeaders(): Record<string, string> {
 }
 
 export const authApi = createAuthApi(httpClient)
+export const profileApi = createProfileApi(httpClient)
 export const emissionApi = createEmissionApi(httpClient)
+export const voteApi = createVoteApi(httpClient)
 export const newsApi = createNewsApi(httpClient)
 export const uploadApi = createUploadApi({ getToken: () => getAccessToken() })
 export const videoApi = createVideoApi(httpClient)

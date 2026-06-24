@@ -305,6 +305,36 @@ export function mapEditionMetaForVotePage(edition: EditionRankingEditionMetaDto)
   }
 }
 
+export function mapEditionDetailForVotePage(detail: EditionFullDetailDto): VoteEditionView {
+  const description =
+    detail.description?.trim() ||
+    detail.principles?.trim() ||
+    detail.gameRules?.trim() ||
+    detail.title
+
+  return {
+    year: editionYearFromIsoDate(detail.startDate),
+    title: detail.title,
+    theme: detail.principles?.trim() || description,
+    tagline: description,
+    dates:
+      detail.startDate?.trim() && detail.endDate?.trim()
+        ? formatEditionDateRange(detail.startDate, detail.endDate)
+        : 'Dates a confirmer',
+    location: detail.emissionName?.trim() || detail.title,
+  }
+}
+
+export function findCandidateRankInEdition(
+  detail: EditionFullDetailDto,
+  candidateId: string,
+  pointsPerVote: number,
+): number {
+  const candidates = buildEditionCandidates(detail, [], pointsPerVote)
+  const index = candidates.findIndex((candidate) => candidate.id === candidateId)
+  return index >= 0 ? index + 1 : 0
+}
+
 export function mapCandidateDetailToCandidate(
   d: EmissionCandidateDetailDto,
   rank: number,

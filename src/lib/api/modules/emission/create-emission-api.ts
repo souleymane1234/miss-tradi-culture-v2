@@ -7,22 +7,16 @@ import type {
   EditionCandidatesEnvelopeDto,
   EditionFullDetailEnvelopeDto,
   EditionListEnvelopeDto,
-  EditionRankingEnvelopeDto,
   EmissionCandidateDetailEnvelopeDto,
   EmissionCategoriesEnvelopeDto,
   EmissionDetailEnvelopeDto,
   EmissionListEnvelopeDto,
   EmissionTagsEnvelopeDto,
   ListEditionCandidatesQuery,
-  ListEditionRankingQuery,
   ListEmissionCategoriesQuery,
   ListEmissionEditionsQuery,
   ListEmissionTagsQuery,
   ListEmissionsQuery,
-  VoteConfirmBodyDto,
-  VoteConfirmEnvelopeDto,
-  VoteInitiateBodyDto,
-  VoteInitiateEnvelopeDto,
 } from './emission.types'
 
 export interface EmissionApi {
@@ -34,23 +28,11 @@ export interface EmissionApi {
   ): Promise<EditionListEnvelopeDto>
   getActiveEdition(emissionId: string): Promise<ActiveEditionEnvelopeDto>
   getEditionById(editionId: string): Promise<EditionFullDetailEnvelopeDto>
-  getEditionRanking(
-    editionId: string,
-    params?: ListEditionRankingQuery,
-  ): Promise<EditionRankingEnvelopeDto>
   getEditionCandidates(
     editionId: string,
     params?: ListEditionCandidatesQuery,
   ): Promise<EditionCandidatesEnvelopeDto>
   getCandidateById(candidateId: string): Promise<EmissionCandidateDetailEnvelopeDto>
-  initiateCandidateVote(
-    candidateId: string,
-    body: VoteInitiateBodyDto,
-  ): Promise<VoteInitiateEnvelopeDto>
-  confirmCandidateVote(
-    candidateId: string,
-    body: VoteConfirmBodyDto,
-  ): Promise<VoteConfirmEnvelopeDto>
   applyToEdition(editionId: string, body: ApplyToEditionBodyDto): Promise<ApplyToEditionEnvelopeDto>
   listCategories(params?: ListEmissionCategoriesQuery): Promise<EmissionCategoriesEnvelopeDto>
   listTags(params?: ListEmissionTagsQuery): Promise<EmissionTagsEnvelopeDto>
@@ -108,17 +90,6 @@ export function createEmissionApi(
       })
     },
 
-    getEditionRanking(editionId, params) {
-      return http.request<EditionRankingEnvelopeDto>({
-        method: 'GET',
-        path: paths.editionRanking(editionId),
-        query: {
-          page: params?.page,
-          limit: params?.limit,
-        },
-      })
-    },
-
     getEditionCandidates(editionId, params) {
       return http.request<EditionCandidatesEnvelopeDto>({
         method: 'GET',
@@ -135,22 +106,6 @@ export function createEmissionApi(
       return http.request<EmissionCandidateDetailEnvelopeDto>({
         method: 'GET',
         path: paths.candidateById(candidateId),
-      })
-    },
-
-    initiateCandidateVote(candidateId, body) {
-      return http.request<VoteInitiateEnvelopeDto>({
-        method: 'POST',
-        path: paths.candidateVoteInitiate(candidateId),
-        body,
-      })
-    },
-
-    confirmCandidateVote(candidateId, body) {
-      return http.request<VoteConfirmEnvelopeDto>({
-        method: 'POST',
-        path: paths.candidateVoteConfirm(candidateId),
-        body,
       })
     },
 

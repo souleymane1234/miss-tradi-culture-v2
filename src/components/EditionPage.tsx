@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { USE_MOCK_DATA } from '../config/app-config'
 import {
   CURRENT_EDITION_YEAR,
@@ -12,6 +13,8 @@ import {
   useResolvedEmission,
 } from '../hooks/use-emission-queries'
 import { formatEditionStage, formatFcfa } from '../lib/edition-presentation'
+import { prefetchEditionById } from '../lib/prefetch-emission-data'
+import { buildVotePageHref, persistVoteEditionId } from '../lib/vote-navigation'
 import { CandidatureModal } from './CandidatureModal'
 import { EditionVideoPlayer } from './EditionVideoPlayer'
 import { HeroVideo } from './HeroVideo'
@@ -308,6 +311,7 @@ function EditionInfoModal({
 
 
 export function EditionPage() {
+  const queryClient = useQueryClient()
   const resolvedEmission = useResolvedEmission()
   const catalogQuery = useEmissionEditionsCatalog(
     USE_MOCK_DATA ? null : (resolvedEmission.emission?.id ?? null),
@@ -382,13 +386,19 @@ export function EditionPage() {
   )
 
   const handleVote = (candidate: Candidate) => {
-    window.location.href = `/vote/${candidate.id}`
+    if (!selectedEditionId) {
+      window.location.href = `/vote/${candidate.id}`
+      return
+    }
+    persistVoteEditionId(candidate.id, selectedEditionId)
+    window.location.href = buildVotePageHref(candidate.id, selectedEditionId)
   }
 
   const selectEdition = (editionId: string, year: number) => {
     setSelectedEditionId(editionId)
     setRegionFilter('all')
     setVideoCandidate(null)
+    void prefetchEditionById(queryClient, editionId)
     const canonical = catalog.find((c) => c.status === 'current') ?? catalog[0]
     const path =
       canonical && editionId === canonical.editionId ? '/edition' : `/edition/${year}`
@@ -457,6 +467,10 @@ export function EditionPage() {
           editionDetail.quizEnabled && editionDetail.quizPrice != null
             ? formatFcfa(editionDetail.quizPrice)
             : null,
+        voteAmountPerVote:
+          editionDetail.voteAmountPerVote != null && editionDetail.voteAmountPerVote > 0
+            ? formatFcfa(editionDetail.voteAmountPerVote)
+            : null,
         statusLabel: isPast ? 'Edition terminee' : 'Edition en cours',
       }
     }
@@ -473,6 +487,7 @@ export function EditionPage() {
       candidateCount: edition?.candidateCount ?? 0,
       candidaturePrice: null as string | null,
       quizPrice: null as string | null,
+      voteAmountPerVote: null as string | null,
       statusLabel: isPast ? 'Edition terminee' : 'Edition en cours',
     }
   }, [
@@ -633,7 +648,9 @@ export function EditionPage() {
                 <p className="edition-page__presentation-eyebrow">{presentation.eyebrow}</p>
                 <h2 className="edition-page__presentation-title">{presentation.title}</h2>
                 <p className="edition-page__presentation-vote-line">
-                  Chaque vote compte — {resolvedEmission.pointsPerVote} pts par pack valide.
+                  {presentation.voteAmountPerVote
+                    ? `Chaque vote compte — ${presentation.voteAmountPerVote} par vote.`
+                    : 'Chaque vote compte.'}
                 </p>
                 {presentation.description && <p className="edition-page__presentation-lead">{presentation.description}</p>}
                 {presentation.principles && (
@@ -662,6 +679,12 @@ export function EditionPage() {
                     <li>
                       <span>Quiz</span>
                       <strong>{presentation.quizPrice}</strong>
+                    </li>
+                  )}
+                  {presentation.voteAmountPerVote && (
+                    <li>
+                      <span>Vote</span>
+                      <strong>{presentation.voteAmountPerVote}</strong>
                     </li>
                   )}
                 </ul>
