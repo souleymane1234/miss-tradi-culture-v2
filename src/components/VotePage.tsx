@@ -323,6 +323,10 @@ export function VotePage() {
                   <span>Points quiz</span>
                 </li>
                 <li>
+                  <strong>{candidate.points}</strong>
+                  <span>Points</span>
+                </li>
+                <li>
                   <strong>#{rank || '—'}</strong>
                   <span>Classement</span>
                 </li>

@@ -112,6 +112,37 @@ function candidateTagName(c: CandidateLike): string {
   return c.tag?.name ?? '—'
 }
 
+type CandidatePointsLike = Pick<
+  EditionCandidateDto,
+  'totalVotes' | 'finalistVotes' | 'isFinalist' | 'quizPoints' | 'totalPoints'
+>
+
+/** Points totaux : priorité à totalPoints API, sinon votes × pointsPerVote + quizPoints. */
+export function resolveCandidateTotalPoints(
+  c: CandidatePointsLike,
+  pointsPerVote: number,
+): number {
+  if (typeof c.totalPoints === 'number' && Number.isFinite(c.totalPoints)) {
+    return c.totalPoints
+  }
+  const votes = c.isFinalist ? c.finalistVotes : c.totalVotes
+  return votes * pointsPerVote + (c.quizPoints ?? 0)
+}
+
+function compareCandidatesByRanking(
+  a: EditionCandidateDto,
+  b: EditionCandidateDto,
+  pointsPerVote: number,
+): number {
+  const pointsA = resolveCandidateTotalPoints(a, pointsPerVote)
+  const pointsB = resolveCandidateTotalPoints(b, pointsPerVote)
+  if (pointsB !== pointsA) return pointsB - pointsA
+  const votesA = a.isFinalist ? a.finalistVotes : a.totalVotes
+  const votesB = b.isFinalist ? b.finalistVotes : b.totalVotes
+  if (votesB !== votesA) return votesB - votesA
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+}
+
 /** Tous les candidats VALIDE d'une édition (candidates + finalists, dédoublonnés). */
 export function collectEditionCandidates(detail: EditionFullDetailDto): EditionCandidateDto[] {
   const byId = new Map<string, EditionCandidateDto>()
@@ -177,12 +208,22 @@ export function mapEditionCandidateToCandidate(
     bio: c.description,
     tradition: candidateTraditionLabel(c),
     votes,
-    points: votes * pointsPerVote + quizPoints,
+    points: resolveCandidateTotalPoints(c, pointsPerVote),
     quizPoints,
     mentorName: candidateCategoryName(c),
     mentorSubtitle: candidateTagName(c),
     videoSrc: c.video?.url ?? undefined,
   }
+}
+
+/** Liste ordonnée depuis GET /emission/editions/:id/candidates (déjà triée par totalPoints). */
+export function buildEditionCandidatesFromList(
+  candidates: EditionCandidateDto[],
+  pointsPerVote: number,
+): Candidate[] {
+  return candidates.map((c, index) =>
+    mapEditionCandidateToCandidate(c, index + 1, pointsPerVote),
+  )
 }
 
 export function mapRankingCandidateToCandidate(
@@ -212,12 +253,7 @@ export function buildEditionCandidates(
   }
 
   return collectEditionCandidates(detail)
-    .sort((a, b) => {
-      const votesA = a.isFinalist ? a.finalistVotes : a.totalVotes
-      const votesB = b.isFinalist ? b.finalistVotes : b.totalVotes
-      if (votesB !== votesA) return votesB - votesA
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    })
+    .sort((a, b) => compareCandidatesByRanking(a, b, pointsPerVote))
     .map((c, index) => mapEditionCandidateToCandidate(c, index + 1, pointsPerVote))
 }
 
@@ -244,10 +280,14 @@ export function mapEditionFullDetailToEdition(
   detail: EditionFullDetailDto,
   ranking: EditionRankingCandidateDto[],
   pointsPerVote: number,
+  candidatesList?: EditionCandidateDto[],
 ): Edition {
   const year = editionYearFromIsoDate(detail.startDate)
   const past = isEditionPast(detail.endDate, detail.isActive)
-  const candidates = buildEditionCandidates(detail, ranking, pointsPerVote)
+  const candidates =
+    candidatesList && candidatesList.length > 0
+      ? buildEditionCandidatesFromList(candidatesList, pointsPerVote)
+      : buildEditionCandidates(detail, ranking, pointsPerVote)
 
   const winner = candidates.find((c) =>
     detail.finalists.some((f) => f.id === c.id && f.isFinalist),
@@ -329,10 +369,23 @@ export function findCandidateRankInEdition(
   detail: EditionFullDetailDto,
   candidateId: string,
   pointsPerVote: number,
+  candidatesList?: EditionCandidateDto[],
 ): number {
+  if (candidatesList && candidatesList.length > 0) {
+    const index = candidatesList.findIndex((c) => c.id === candidateId)
+    return index >= 0 ? index + 1 : 0
+  }
+
   const candidates = buildEditionCandidates(detail, [], pointsPerVote)
   const index = candidates.findIndex((candidate) => candidate.id === candidateId)
   return index >= 0 ? index + 1 : 0
+}
+
+export function findCandidateInEditionList(
+  candidates: EditionCandidateDto[],
+  candidateId: string,
+): EditionCandidateDto | null {
+  return candidates.find((c) => c.id === candidateId) ?? null
 }
 
 export function mapCandidateDetailToCandidate(
@@ -360,6 +413,7 @@ export function mapCandidateDetailToCandidate(
       totalVotes: d.totalVotes,
       finalistVotes: d.finalistVotes ?? 0,
       quizPoints: d.quizPoints,
+      totalPoints: d.totalPoints,
       createdAt: d.createdAt,
       updatedAt: d.updatedAt,
       user: d.user,
@@ -414,6 +468,7 @@ export function mergeCandidateWithEditionDetail(
     totalVotes: full.totalVotes,
     finalistVotes: full.finalistVotes ?? summary?.finalistVotes,
     quizPoints: full.quizPoints ?? summary?.quizPoints,
+    totalPoints: full.totalPoints ?? summary?.totalPoints,
     createdAt: full.createdAt,
     updatedAt: full.updatedAt,
     user: full.user,

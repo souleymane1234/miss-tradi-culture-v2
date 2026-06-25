@@ -378,8 +378,8 @@ export interface ApplyToEditionEnvelopeDto {
 export interface EditionCandidateUserDto {
   id?: string;
   userId?: string;
-  lastName: string;
-  firstName: string;
+  lastName?: string;
+  firstName?: string;
   pseudo: string;
   /** Âge en années si fourni par l’API. */
   age?: number | null;
@@ -419,12 +419,14 @@ export interface EditionCandidateDto {
   totalVotes: number;
   finalistVotes: number;
   quizPoints?: number;
+  /** Points totaux (votes + quiz) calculés côté API. */
+  totalPoints?: number;
   createdAt: string;
   updatedAt: string;
   user: EditionCandidateUserDto;
   /** Référentiel candidature (si inclus par l’API). */
-  category?: { id: string; name: string } | null;
-  tag?: { id: string; name: string } | null;
+  category?: { id: string; name: string; code?: string; active?: boolean; sortOrder?: number } | null;
+  tag?: { id: string; name: string; code?: string; active?: boolean; sortOrder?: number; categoryId?: string } | null;
 }
 
 /** GET /emission/candidates/:id — candidat + édition imbriquée. */
@@ -448,6 +450,7 @@ export interface EmissionCandidateDetailDto {
   totalVotes: number;
   finalistVotes?: number;
   quizPoints?: number;
+  totalPoints?: number;
   createdAt: string;
   updatedAt: string;
   user: EditionCandidateUserDto;
@@ -599,6 +602,8 @@ export interface ListEditionCandidatesQuery {
 
 export interface EditionCandidatesDataDto {
   requireDocuments: boolean;
+  /** ID du candidat de l'utilisateur connecté (null sans JWT ou sans candidature). */
+  myCandidateId?: string | null;
   candidates: EditionCandidateDto[];
 }
 

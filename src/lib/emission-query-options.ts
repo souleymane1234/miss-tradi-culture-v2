@@ -8,6 +8,7 @@ export const EMISSION_STALE_MS = 5 * 60_000
 export const EMISSION_GC_MS = 30 * 60_000
 
 const EDITION_LIST_PARAMS = { page: 1, limit: 50 } as const
+const EDITION_CANDIDATES_PARAMS = { page: 1, limit: 100 } as const
 const EMISSION_LIST_PARAMS = { page: 1, limit: 50, isPublic: true } as const
 
 function shouldRetryEmission(failureCount: number, error: unknown): boolean {
@@ -52,6 +53,17 @@ export const emissionQueries = {
     queryOptions({
       queryKey: emissionQueryKeys.editionDetail(editionId),
       queryFn: () => emissionRequest.getEditionById(editionId),
+      ...sharedEmissionQueryOptions,
+    }),
+
+  editionCandidates: (editionId: string, tagId?: string) =>
+    queryOptions({
+      queryKey: emissionQueryKeys.editionCandidates(editionId, tagId),
+      queryFn: () =>
+        emissionRequest.getEditionCandidates(editionId, {
+          ...EDITION_CANDIDATES_PARAMS,
+          ...(tagId ? { tagId } : {}),
+        }),
       ...sharedEmissionQueryOptions,
     }),
 

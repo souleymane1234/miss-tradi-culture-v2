@@ -3,6 +3,7 @@ import { DEFAULT_VOTE_UNIT_PRICE, USE_MOCK_DATA } from '../config/app-config'
 import { emissionQueries } from '../lib/emission-query-options'
 import {
   findCandidateInEditionDetail,
+  findCandidateInEditionList,
   findCandidateRankInEdition,
   mapEditionFullDetailToEdition,
   mergeCandidateWithEditionDetail,
@@ -61,22 +62,39 @@ export function useEditionFromApi(editionId: string | null, pointsPerVote: numbe
     enabled: !USE_MOCK_DATA && Boolean(editionId),
   })
 
-  const isLoading = detailQuery.isLoading
-  const isError = detailQuery.isError
-  const error = detailQuery.error
+  const candidatesQuery = useQuery({
+    ...emissionQueries.editionCandidates(editionId ?? ''),
+    enabled: !USE_MOCK_DATA && Boolean(editionId),
+  })
+
+  const isLoading = detailQuery.isLoading || candidatesQuery.isLoading
+  const isError = detailQuery.isError || candidatesQuery.isError
+  const error = detailQuery.error ?? candidatesQuery.error
+
+  const candidatesList = candidatesQuery.data?.data.candidates ?? []
+  const myCandidateId = candidatesQuery.data?.data.myCandidateId ?? null
 
   const edition =
     detailQuery.data?.data && editionId
-      ? mapEditionFullDetailToEdition(detailQuery.data.data, [], pointsPerVote)
+      ? mapEditionFullDetailToEdition(
+          detailQuery.data.data,
+          [],
+          pointsPerVote,
+          candidatesList,
+        )
       : null
 
   return {
     edition,
     editionDetail: detailQuery.data?.data ?? null,
+    candidatesList,
+    myCandidateId,
     isLoading,
     isError,
     error,
-    refetch: detailQuery.refetch,
+    refetch: async () => {
+      await Promise.all([detailQuery.refetch(), candidatesQuery.refetch()])
+    },
   }
 }
 
@@ -90,27 +108,44 @@ export function useCandidateFromApi(
     enabled: !USE_MOCK_DATA && Boolean(candidateId) && Boolean(editionId),
   })
 
+  const candidatesQuery = useQuery({
+    ...emissionQueries.editionCandidates(editionId ?? ''),
+    enabled: !USE_MOCK_DATA && Boolean(candidateId) && Boolean(editionId),
+  })
+
   const editionDetail = editionDetailQuery.data?.data ?? null
+  const candidatesList = candidatesQuery.data?.data.candidates ?? []
+  const fullFromList =
+    candidateId && candidatesList.length > 0
+      ? findCandidateInEditionList(candidatesList, candidateId)
+      : null
   const fullFromEdition =
     editionDetail && candidateId
       ? findCandidateInEditionDetail(editionDetail, candidateId)
       : null
-  const mergedCandidate = fullFromEdition
-    ? mergeCandidateWithEditionDetail(undefined, fullFromEdition)
+  const fullFromEditionOrList = fullFromList ?? fullFromEdition
+  const mergedCandidate = fullFromEditionOrList
+    ? mergeCandidateWithEditionDetail(undefined, fullFromEditionOrList)
     : null
 
   const rank =
     editionDetail && candidateId
-      ? findCandidateRankInEdition(editionDetail, candidateId, pointsPerVote)
+      ? findCandidateRankInEdition(
+          editionDetail,
+          candidateId,
+          pointsPerVote,
+          candidatesList.length > 0 ? candidatesList : undefined,
+        )
       : 0
 
   return {
     candidateDto: mergedCandidate,
     editionDetail,
     rank: rank > 0 ? rank : 0,
-    isLoading: editionDetailQuery.isLoading,
-    isError: editionDetailQuery.isError && !mergedCandidate,
-    error: editionDetailQuery.error,
+    isLoading: editionDetailQuery.isLoading || candidatesQuery.isLoading,
+    isError:
+      (editionDetailQuery.isError || candidatesQuery.isError) && !mergedCandidate,
+    error: editionDetailQuery.error ?? candidatesQuery.error,
     missingEditionId: Boolean(candidateId) && !editionId,
     pointsPerVote,
   }

@@ -20,7 +20,10 @@ function resolveEditionIdFromPath(catalog: EditionCatalogTab[]): string | null {
 }
 
 async function prefetchEditionChain(queryClient: QueryClient, editionId: string): Promise<void> {
-  await queryClient.prefetchQuery(emissionQueries.editionDetail(editionId))
+  await Promise.all([
+    queryClient.prefetchQuery(emissionQueries.editionDetail(editionId)),
+    queryClient.prefetchQuery(emissionQueries.editionCandidates(editionId)),
+  ])
 }
 
 /** Précharge émission + catalogue + édition courante via React Query. */

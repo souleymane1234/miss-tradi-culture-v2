@@ -68,6 +68,7 @@ function CandidateCard({
   candidate,
   rank,
   isWinner,
+  isMine,
   isPastEdition,
   onPlayVideo,
   onVote,
@@ -75,6 +76,7 @@ function CandidateCard({
   candidate: Candidate
   rank: number
   isWinner: boolean
+  isMine?: boolean
   isPastEdition: boolean
   onPlayVideo: (candidate: Candidate) => void
   onVote: (candidate: Candidate) => void
@@ -100,6 +102,10 @@ function CandidateCard({
         <span className="edition-page__candidate-winner-tag">Gagnante</span>
       )}
 
+      {isMine && (
+        <span className="edition-page__candidate-winner-tag">Ma candidature</span>
+      )}
+
       <button
         type="button"
         className="edition-page__candidate-play"
@@ -112,7 +118,7 @@ function CandidateCard({
       <div className="edition-page__candidate-footer">
         <h3 className="edition-page__candidate-username">{candidate.username}</h3>
         <p className="edition-page__candidate-stats">
-          {candidate.votes} vote · {candidate.points} points
+          {candidate.votes} votes · {candidate.points} points
         </p>
         <p className="edition-page__candidate-quiz">Points quiz : {candidate.quizPoints}</p>
 
@@ -346,6 +352,7 @@ export function EditionPage() {
   const {
     edition: apiEdition,
     editionDetail,
+    myCandidateId,
     isLoading: editionLoading,
     isError: editionError,
   } = useEditionFromApi(apiEditionId, pointsPerVote)
@@ -771,6 +778,7 @@ export function EditionPage() {
                   candidate={candidate}
                   rank={index + 1}
                   isWinner={edition.winnerId === candidate.id}
+                  isMine={myCandidateId === candidate.id}
                   isPastEdition={isPast}
                   onPlayVideo={setVideoCandidate}
                   onVote={handleVote}
