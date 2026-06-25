@@ -7,6 +7,9 @@ import { mergeProfileUpdate } from '../lib/merge-profile-update'
 import { useIsAuthenticated, useLogoutMutation } from '../hooks/use-candidature-queries'
 import { useStudentProfileQuery, useUpdateProfileMutation } from '../hooks/use-profile-queries'
 import { uploadApi } from '../services/api-client'
+import { MAX_VIDEO_FILE_BYTES, validateVideoFileSize } from '../lib/upload-file-utils'
+import { formatFileSize } from '../lib/candidature-utils'
+import { VideoLimitModal } from './VideoLimitModal'
 import { SOCIAL_PLATFORM_OPTIONS } from '../lib/social-platform'
 import { ProfileSocialLinks } from './ProfileSocialLinks'
 import { ProfilePresentationVideo } from './ProfilePresentationVideo'
@@ -143,6 +146,7 @@ export function ProfilePage() {
   const [uploadingField, setUploadingField] = useState<'profileImage' | 'coverImage' | 'video' | null>(
     null,
   )
+  const [videoLimitMessage, setVideoLimitMessage] = useState<string | null>(null)
 
   const user = useMemo(() => getAuthUser(), [authenticated, updateMutation.isSuccess, profileQuery.data])
 
@@ -246,8 +250,19 @@ export function ProfilePage() {
   const handleFileUpload = async (
     field: 'profileImage' | 'coverImage' | 'videoPresentationUrl',
     file: File | undefined,
+    inputEl?: HTMLInputElement | null,
   ) => {
     if (!file) return
+
+    if (field === 'videoPresentationUrl') {
+      const sizeError = validateVideoFileSize(file)
+      if (sizeError) {
+        setVideoLimitMessage(sizeError)
+        if (inputEl) inputEl.value = ''
+        return
+      }
+    }
+
     setUploadingField(
       field === 'videoPresentationUrl' ? 'video' : field === 'profileImage' ? 'profileImage' : 'coverImage',
     )
@@ -299,6 +314,13 @@ export function ProfilePage() {
 
   return (
     <main className="profile-page" aria-labelledby="profile-title">
+      {videoLimitMessage && (
+        <VideoLimitModal
+          message={videoLimitMessage}
+          onClose={() => setVideoLimitMessage(null)}
+        />
+      )}
+
       <div className="profile-page__inner">
         <p className="profile-page__eyebrow">Espace personnel</p>
         <h1 id="profile-title">Mon profil</h1>
@@ -581,9 +603,14 @@ export function ProfilePage() {
                 accept="video/*"
                 hidden
                 disabled={uploadingField !== null}
-                onChange={(e) => void handleFileUpload('videoPresentationUrl', e.target.files?.[0])}
+                onChange={(e) =>
+                  void handleFileUpload('videoPresentationUrl', e.target.files?.[0], e.target)
+                }
               />
             </label>
+            <p className="profile-page__upload-hint">
+              Taille maximale : {formatFileSize(MAX_VIDEO_FILE_BYTES)}
+            </p>
           </section>
 
           <div className="profile-page__actions">

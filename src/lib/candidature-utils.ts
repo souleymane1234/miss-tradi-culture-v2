@@ -1,5 +1,7 @@
+import { MAX_VIDEO_FILE_BYTES } from './upload-file-utils'
+
 export const CANDIDATURE_PHOTO_MAX_BYTES = 2 * 1024 * 1024
-export const CANDIDATURE_VIDEO_MAX_BYTES = 30 * 1024 * 1024
+export const CANDIDATURE_VIDEO_MAX_BYTES = MAX_VIDEO_FILE_BYTES
 
 const PHOTO_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 const VIDEO_MIME_TYPES = new Set(['video/mp4', 'video/quicktime', 'video/webm', 'video/x-m4v'])
@@ -25,7 +27,7 @@ export function validateCandidatureVideoFile(file: File): string | null {
     return 'Format video non pris en charge (MP4, MOV ou WebM).'
   }
   if (file.size > CANDIDATURE_VIDEO_MAX_BYTES) {
-    return `La video depasse 30 Mo (${formatFileSize(file.size)}).`
+    return `La video depasse 50 Mo (${formatFileSize(file.size)}).`
   }
   return null
 }

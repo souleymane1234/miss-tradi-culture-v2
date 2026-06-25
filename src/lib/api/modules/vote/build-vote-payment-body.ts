@@ -5,10 +5,8 @@ import type {
   InitiateVotePaymentInput,
 } from './vote.types'
 
-const MAX_VOTES = 8
-
-function clampVoteCount(count: number): number {
-  return Math.min(MAX_VOTES, Math.max(1, Math.floor(count)))
+function normalizeVoteCount(count: number): number {
+  return Math.max(1, Math.floor(count))
 }
 
 /**
@@ -18,7 +16,7 @@ function clampVoteCount(count: number): number {
 export function buildInitiateVotePaymentBody(
   input: InitiateVotePaymentInput,
 ): InitiateVotePaymentBody {
-  const voteCount = clampVoteCount(input.voteCount)
+  const voteCount = normalizeVoteCount(input.voteCount)
   const phoneNumber = input.phoneNumber.trim()
   const provider = input.provider
   const otp = input.otp?.trim()
@@ -35,6 +33,6 @@ export function buildConfirmVotePaymentBody(
 ): ConfirmVotePaymentBody {
   return {
     transactionId: input.transactionId.trim(),
-    voteCount: clampVoteCount(input.voteCount),
+    voteCount: normalizeVoteCount(input.voteCount),
   }
 }

@@ -1,6 +1,7 @@
 import { buildApiEnvironment } from '../../config/api-environment'
 import { xhrMultipartUpload } from '../../adapters/xhr-multipart-upload'
 import type { TokenProvider } from '../../ports/token-provider.port'
+import { validateVideoFileSize } from '../../../upload-file-utils'
 import { parseUploadUrl } from './parse-upload-url'
 import { UPLOAD_API_PATHS, type UploadApiPaths } from './upload.paths'
 import type { UploadEnvelopeDto } from './upload.types'
@@ -38,6 +39,10 @@ export function createUploadApi(options: CreateUploadApiOptions = {}): UploadApi
       return uploadFile(paths.image, file, getToken)
     },
     uploadVideo(file) {
+      const sizeError = validateVideoFileSize(file)
+      if (sizeError) {
+        return Promise.reject(new Error(sizeError))
+      }
       return uploadFile(paths.video, file, getToken)
     },
   }

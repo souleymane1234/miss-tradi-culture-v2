@@ -8,6 +8,8 @@ import {
   type FormEvent,
 } from 'react'
 import { USE_MOCK_DATA } from '../config/app-config'
+import { validateVideoFileSize } from '../lib/upload-file-utils'
+import { VideoLimitModal } from './VideoLimitModal'
 import {
   formatFileSize,
   validateCandidaturePhotoFile,
@@ -102,6 +104,7 @@ export function CandidatureModal({
   const [registerFirstName, setRegisterFirstName] = useState('')
   const [registerLastName, setRegisterLastName] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [videoLimitMessage, setVideoLimitMessage] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
 
   const refsEnabled = open && !USE_MOCK_DATA
@@ -186,6 +189,12 @@ export function CandidatureModal({
   const handleVideoFileChange = (file: File | null) => {
     if (!file) {
       setVideoFile(null)
+      return
+    }
+    const sizeError = validateVideoFileSize(file)
+    if (sizeError) {
+      setVideoLimitMessage(sizeError)
+      if (videoInputRef.current) videoInputRef.current.value = ''
       return
     }
     const validationError = validateCandidatureVideoFile(file)
@@ -320,6 +329,14 @@ export function CandidatureModal({
     (Boolean(form.categoryId) && tagsQuery.isLoading)
 
   return (
+    <>
+      {videoLimitMessage && (
+        <VideoLimitModal
+          message={videoLimitMessage}
+          onClose={() => setVideoLimitMessage(null)}
+        />
+      )}
+
     <div
       className="candidature-modal"
       role="presentation"
@@ -728,5 +745,6 @@ export function CandidatureModal({
         )}
       </div>
     </div>
+    </>
   )
 }

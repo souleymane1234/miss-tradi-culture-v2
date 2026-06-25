@@ -1,3 +1,20 @@
+/** Taille maximale pour tout envoi video (candidature, profil, etc.). */
+export const MAX_VIDEO_FILE_BYTES = 50 * 1024 * 1024
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} o`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`
+}
+
+/** Refuse les videos au-dela de 50 Mo avant tout upload. */
+export function validateVideoFileSize(file: File): string | null {
+  if (file.size > MAX_VIDEO_FILE_BYTES) {
+    return `La video depasse 50 Mo (${formatFileSize(file.size)}). Choisissez un fichier plus leger.`
+  }
+  return null
+}
+
 const PHOTO_EXT_MIME: Record<string, string> = {
   jpg: 'image/jpeg',
   jpeg: 'image/jpeg',

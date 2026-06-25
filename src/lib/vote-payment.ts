@@ -1,7 +1,8 @@
 import { ApiHttpError } from './api/errors/api-http-error'
 import type { VotePaymentProvider } from './api/modules/vote/vote.types'
 
-export const MAX_VOTES_PER_PAYMENT = 8
+/** Code USSD Orange Money pour generer un OTP de paiement. */
+export const ORANGE_PAYMENT_USSD_CODE = '#144*82#'
 
 const VOTE_PHONE_RULES: Record<
   VotePaymentProvider,
@@ -95,7 +96,7 @@ export function validateVotePhoneForProvider(
 }
 
 export function clampVoteCount(count: number): number {
-  return Math.min(MAX_VOTES_PER_PAYMENT, Math.max(1, Math.floor(count)))
+  return Math.max(1, Math.floor(count))
 }
 
 export function formatVotePaymentError(error: unknown, fallback: string): string {

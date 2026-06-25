@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { FaLocationDot } from 'react-icons/fa6'
 import { USE_MOCK_DATA } from '../config/app-config'
@@ -27,7 +27,7 @@ import {
   getVotePhoneExample,
   getVotePhoneHint,
   isVoteAmountInvalid,
-  MAX_VOTES_PER_PAYMENT,
+  ORANGE_PAYMENT_USSD_CODE,
   resolveVoteAmountPerVote,
   validateVotePhoneForProvider,
 } from '../lib/vote-payment'
@@ -55,6 +55,62 @@ function mapMobileMoneyToApiProvider(id: OperatorId): VotePaymentProvider {
     wave: 'waveci',
   }
   return map[id]
+}
+
+function VoteSuccessDialog({
+  voteCount,
+  candidateName,
+  editionHref,
+  onClose,
+}: {
+  voteCount: number
+  candidateName: string
+  editionHref: string
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  return (
+    <div className="vote-success" role="presentation" onClick={onClose}>
+      <div
+        className="vote-success__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="vote-success-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="vote-success__confetti" aria-hidden="true" />
+        <div className="vote-success__icon" aria-hidden="true">
+          ✓
+        </div>
+        <p className="vote-success__eyebrow">Paiement valide</p>
+        <h2 id="vote-success-title">Merci pour ton vote !</h2>
+        <p className="vote-success__text">
+          <strong>{voteCount}</strong> vote{voteCount > 1 ? 's' : ''}{' '}
+          {voteCount > 1 ? 'ont ete comptabilises' : 'a ete comptabilise'} pour{' '}
+          <strong>{candidateName}</strong>.
+        </p>
+        <div className="vote-success__actions">
+          <a href={editionHref} className="vote-success__btn vote-success__btn--primary">
+            Retour a l&apos;edition
+          </a>
+          <button
+            type="button"
+            className="vote-success__btn vote-success__btn--ghost"
+            onClick={onClose}
+          >
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function VotePage() {
@@ -90,6 +146,10 @@ export function VotePage() {
   const [pendingPayment, setPendingPayment] = useState<{
     transactionId: string
     voteCount: number
+  } | null>(null)
+  const [voteSuccess, setVoteSuccess] = useState<{
+    voteCount: number
+    candidateName: string
   } | null>(null)
 
   const apiContext = useMemo(() => {
@@ -177,11 +237,6 @@ export function VotePage() {
       return
     }
 
-    if (voteCount > MAX_VOTES_PER_PAYMENT) {
-      setPaymentError(`Maximum ${MAX_VOTES_PER_PAYMENT} votes par paiement.`)
-      return
-    }
-
     if (USE_MOCK_DATA) {
       window.alert(
         `Paiement de ${total} F CFA pour ${voteCount} vote(s) en faveur de ${candidate.name} via ${operatorLabel}.`,
@@ -239,9 +294,15 @@ export function VotePage() {
         transactionId: pendingPayment.transactionId,
         voteCount: pendingPayment.voteCount,
       })
+      const confirmedCount = pendingPayment.voteCount
       setPendingPayment(null)
+      setVoteSuccess({ voteCount: confirmedCount, candidateName: candidate.name })
       void queryClient.invalidateQueries({ queryKey: emissionQueryKeys.candidate(candidateId) })
-      window.alert('Votes enregistres avec succes !')
+      if (editionId) {
+        void queryClient.invalidateQueries({
+          queryKey: emissionQueryKeys.editionCandidates(editionId),
+        })
+      }
     } catch (e) {
       setPaymentError(
         e instanceof ApiHttpError ? e.message : 'Enregistrement des votes impossible.',
@@ -262,6 +323,15 @@ export function VotePage() {
 
   return (
     <main className="vote-page" id="vote">
+      {voteSuccess && (
+        <VoteSuccessDialog
+          voteCount={voteSuccess.voteCount}
+          candidateName={voteSuccess.candidateName}
+          editionHref={editionHref}
+          onClose={() => setVoteSuccess(null)}
+        />
+      )}
+
       <div className="vote-page__shell">
         <a href={editionHref} className="vote-page__back">
           ← Retour a l&apos;edition {edition.year}
@@ -429,35 +499,69 @@ export function VotePage() {
                     ))}
                   </div>
                   <p className="vote-page__operator-note">
-                    Orange Money necessite le code OTP recu par SMS. MTN, Moov et Wave ne
-                    demandent pas d&apos;OTP sur cette page.
+                    Orange Money : composez {ORANGE_PAYMENT_USSD_CODE} pour obtenir un code OTP.
+                    MTN, Moov et Wave ne demandent pas d&apos;OTP sur cette page.
                   </p>
                 </fieldset>
 
                 {operator === 'orange' && (
-                  <label className="vote-page__field vote-page__field--otp">
-                    <span>Code OTP Orange Money</span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      placeholder="Ex: 123456"
-                      value={orangeOtp}
-                      onChange={(e) => setOrangeOtp(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                      disabled={Boolean(pendingPayment)}
-                      maxLength={8}
-                    />
-                    <span className="vote-page__field-hint">
-                      Saisissez le code a usage unique envoye sur votre telephone Orange.
-                    </span>
-                  </label>
+                  <>
+                    <div className="vote-page__orange-ussd" role="note">
+                      <p className="vote-page__orange-ussd-label">
+                        Pour generer votre code de paiement Orange Money, composez sur votre
+                        telephone :
+                      </p>
+                      <p
+                        className="vote-page__orange-ussd-code"
+                        aria-label="Code USSD Orange Money"
+                      >
+                        {ORANGE_PAYMENT_USSD_CODE}
+                      </p>
+                      <p className="vote-page__orange-ussd-hint">
+                        Saisissez ensuite le code recu par SMS dans le champ ci-dessous.
+                      </p>
+                    </div>
+                    <label className="vote-page__field vote-page__field--otp">
+                      <span>Code OTP Orange Money</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        placeholder="Ex: 123456"
+                        value={orangeOtp}
+                        onChange={(e) =>
+                          setOrangeOtp(e.target.value.replace(/\D/g, '').slice(0, 8))
+                        }
+                        disabled={Boolean(pendingPayment)}
+                        maxLength={8}
+                      />
+                      <span className="vote-page__field-hint">
+                        Code a usage unique obtenu apres avoir compose {ORANGE_PAYMENT_USSD_CODE}.
+                      </span>
+                    </label>
+                  </>
                 )}
 
                 <div className="vote-page__votes-row">
                   <div className="vote-page__votes-box">
                     <span className="vote-page__votes-label">Nombre de votes</span>
                     <div className="vote-page__votes-control">
-                      <span className="vote-page__votes-value">{voteCount}</span>
+                      <input
+                        type="number"
+                        className="vote-page__votes-value"
+                        min={1}
+                        step={1}
+                        inputMode="numeric"
+                        value={voteCount}
+                        disabled={Boolean(pendingPayment)}
+                        aria-label="Nombre de votes"
+                        onChange={(e) => {
+                          const raw = e.target.value
+                          if (raw === '') return
+                          const n = Number.parseInt(raw, 10)
+                          if (Number.isFinite(n)) setVoteCount(clampVoteCount(n))
+                        }}
+                      />
                       <div className="vote-page__votes-actions">
                         <button
                           type="button"
@@ -470,7 +574,7 @@ export function VotePage() {
                         <button
                           type="button"
                           aria-label="Ajouter un vote"
-                          disabled={Boolean(pendingPayment) || voteCount >= MAX_VOTES_PER_PAYMENT}
+                          disabled={Boolean(pendingPayment)}
                           onClick={() => setVoteCount((n) => clampVoteCount(n + 1))}
                         >
                           +
@@ -478,10 +582,11 @@ export function VotePage() {
                       </div>
                     </div>
                     <p className="vote-page__unit-price">
-                      Prix unitaire : {voteAmountPerVote} F CFA · max {MAX_VOTES_PER_PAYMENT} votes
+                      Prix unitaire : {voteAmountPerVote} F CFA
                     </p>
                   </div>
 
+                  {/* Quiz candidates — masqué pour l'instant
                   <aside className="vote-page__quiz">
                     <div className="vote-page__quiz-head">
                       <h3>Quiz candidates</h3>
@@ -492,6 +597,7 @@ export function VotePage() {
                       des points supplementaires.
                     </p>
                   </aside>
+                  */}
                 </div>
               </form>
             </div>

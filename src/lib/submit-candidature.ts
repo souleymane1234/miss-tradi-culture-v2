@@ -31,7 +31,7 @@ function wrapUploadError(step: 'photo' | 'video', error: unknown): ApiHttpError 
   const message =
     step === 'photo'
       ? 'Envoi de la photo impossible. Verifiez le format (max 2 Mo) et reessayez.'
-      : 'Envoi de la video impossible. Verifiez le format (max 30 Mo) et reessayez.'
+      : 'Envoi de la video impossible. Verifiez le format (max 50 Mo) et reessayez.'
   return new ApiHttpError({
     message,
     status: 0,

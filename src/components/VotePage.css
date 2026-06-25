@@ -483,10 +483,22 @@
 }
 
 .vote-page__votes-value {
+  width: 6ch;
+  min-width: 3ch;
+  border: none;
+  background: transparent;
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--text-h);
   line-height: 1;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+
+.vote-page__votes-value::-webkit-outer-spin-button,
+.vote-page__votes-value::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .vote-page__votes-actions {
@@ -720,4 +732,196 @@
   place-items: center;
   padding: 48px 24px;
   text-align: center;
+}
+
+/* Orange Money USSD */
+.vote-page__orange-ussd {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, #ff7900 35%, var(--border));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, #ff7900 10%, var(--bg)) 0%,
+    color-mix(in srgb, var(--gold) 8%, var(--bg)) 100%
+  );
+}
+
+.vote-page__orange-ussd-label {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--text-h);
+}
+
+.vote-page__orange-ussd-code {
+  margin: 0 0 8px;
+  font-family: ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #e65100;
+  text-align: center;
+}
+
+.vote-page__orange-ussd-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+/* Popup succes vote */
+.vote-success {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(8, 8, 12, 0.55);
+  backdrop-filter: blur(6px);
+  animation: vote-success-fade-in 0.25s ease;
+}
+
+@keyframes vote-success-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vote-success-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.vote-success__dialog {
+  position: relative;
+  width: min(100%, 400px);
+  padding: 32px 28px 24px;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--border));
+  background: var(--bg);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  text-align: center;
+  animation: vote-success-pop 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+}
+
+.vote-success__confetti {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 120px;
+  background: radial-gradient(
+      circle at 20% 40%,
+      color-mix(in srgb, var(--gold) 35%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 80% 30%,
+      color-mix(in srgb, var(--gold-light) 40%, transparent) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+}
+
+.vote-success__icon {
+  position: relative;
+  z-index: 1;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(160deg, var(--gold-light), var(--gold), var(--gold-deep));
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--gold) 45%, transparent);
+}
+
+.vote-success__eyebrow {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+
+.vote-success__dialog h2 {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 10px;
+  font-family: var(--heading);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.vote-success__text {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 22px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.vote-success__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vote-success__btn {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: filter 0.12s ease, background 0.12s ease;
+}
+
+.vote-success__btn--primary {
+  border: none;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(160deg, var(--gold-light), var(--gold), var(--gold-deep));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.vote-success__btn--primary:hover {
+  filter: brightness(1.06);
+}
+
+.vote-success__btn--ghost {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-h);
+}
+
+.vote-success__btn--ghost:hover {
+  background: color-mix(in srgb, var(--gold) 8%, var(--bg));
 }
