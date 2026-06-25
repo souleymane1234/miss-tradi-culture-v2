@@ -13,7 +13,6 @@ const NAV_LINKS = [
   { id: 'edition', href: () => '/edition', label: 'Edition' },
   { id: 'play', href: () => '/play', label: 'Play' },
   { id: 'partenariat', href: () => '/partenariat', label: 'Partenariat' },
-  { id: 'contact', href: (homePrefix: string) => `${homePrefix}contact`, label: 'Contact' },
 ] as const
 
 function isNavLinkActive(
@@ -26,8 +25,6 @@ function isNavLinkActive(
   switch (linkId) {
     case 'accueil':
       return isHomePage && (!hash || hash === '#accueil')
-    case 'contact':
-      return isHomePage && hash === '#contact'
     case 'actualites':
       return pathname === '/actualites' || pathname.startsWith('/actualites/')
     case 'concours':
