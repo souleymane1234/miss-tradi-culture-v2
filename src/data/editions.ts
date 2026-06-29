@@ -85,7 +85,7 @@ export const EDITIONS: Edition[] = [
   {
     year: 2026,
     status: 'current',
-    title: 'Miss Tradi Culture 2026',
+    title: 'Miss Tradi-Culture  2026',
     theme: 'Heritage et rayonnement',
     tagline: "L'edition qui celebre les racines et l'audace d'une nouvelle generation.",
     description:
@@ -183,7 +183,7 @@ export const EDITIONS: Edition[] = [
     ]),
     prizes: [
       {
-        title: 'Couronne Miss Tradi Culture 2026',
+        title: 'Couronne Miss Tradi-Culture  2026',
         description: 'Titre officiel, sash, diademe et contrat d\'ambassadrice culturelle (12 mois).',
       },
       {
@@ -202,7 +202,7 @@ export const EDITIONS: Edition[] = [
     rulesSummary: [
       'Avoir entre 18 et 30 ans a la date de la finale.',
       'Resider en Cote d\'Ivoire ou justifier d\'un lien culturel avec le pays.',
-      'Ne pas avoir ete finaliste d\'une edition Miss Tradi Culture precedente.',
+      'Ne pas avoir ete finaliste d\'une edition Miss Tradi-Culture  precedente.',
       'Participer a l\'integralite du calendrier officiel (bootcamp, defiles, actions partenaires).',
       'Respecter la charte ethique, l\'image publique et les consignes du comite d\'organisation.',
     ],
@@ -223,7 +223,7 @@ export const EDITIONS: Edition[] = [
   {
     year: 2025,
     status: 'past',
-    title: 'Miss Tradi Culture 2025',
+    title: 'Miss Tradi-Culture  2025',
     theme: 'Racines et modernite',
     tagline: "L'edition qui a reuni 12 candidates de 8 regions.",
     description:
@@ -244,7 +244,7 @@ export const EDITIONS: Edition[] = [
         city: 'Abidjan',
         photoSrc: CANDIDATE_PHOTO('2025-blessing'),
         tradition: 'Kente contemporain',
-        bio: "Miss Tradi Culture 2025. Elle a lance une collecte de tenues traditionnelles pour les lycees.",
+        bio: "Miss Tradi-Culture  2025. Elle a lance une collecte de tenues traditionnelles pour les lycees.",
       },
       {
         id: '2025-naomi',
@@ -319,7 +319,7 @@ export const EDITIONS: Edition[] = [
   {
     year: 2024,
     status: 'past',
-    title: 'Miss Tradi Culture 2024',
+    title: 'Miss Tradi-Culture  2024',
     theme: 'Eclat des traditions',
     tagline: "Quatrieme edition, premiere diffusion en direct sur les reseaux.",
     description:
@@ -340,7 +340,7 @@ export const EDITIONS: Edition[] = [
         city: 'Abidjan',
         photoSrc: CANDIDATE_PHOTO('2024-esperance'),
         tradition: 'Pagne wax revisite',
-        bio: "Miss Tradi Culture 2024. Ambassadrice de l'edition et referente des actions solidaires.",
+        bio: "Miss Tradi-Culture  2024. Ambassadrice de l'edition et referente des actions solidaires.",
       },
       {
         id: '2024-vanessa',

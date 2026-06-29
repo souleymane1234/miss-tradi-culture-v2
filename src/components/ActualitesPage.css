@@ -181,7 +181,6 @@
 .actu-card__stats {
   margin-top: 10px;
   padding: 8px 0;
-  border-bottom: 1px solid var(--border);
   color: var(--text);
   display: flex;
   gap: 14px;
@@ -191,11 +190,11 @@
 
 .actu-card__footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--border);
+  gap: 10px;
 }
 
 .actu-card__read {
@@ -221,6 +220,98 @@
 .actu-card__read:hover {
   background: color-mix(in srgb, var(--gold) 14%, var(--social-bg));
   border-color: color-mix(in srgb, var(--gold) 65%, var(--border));
+}
+
+.actu-card__share-wrap {
+  position: relative;
+}
+
+.actu-card__share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-h);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.actu-card__share:hover {
+  background: color-mix(in srgb, var(--text) 6%, var(--bg));
+}
+
+.actu-card__share-menu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  min-width: 220px;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  z-index: 5;
+}
+
+.actu-card__share-close {
+  margin-left: auto;
+  margin-bottom: 8px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.actu-card__share-close:hover {
+  background: color-mix(in srgb, var(--gold) 12%, var(--bg));
+}
+
+.actu-card__share-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.actu-card__share-network {
+  width: 42px;
+  height: 42px;
+  border: 1px solid color-mix(in srgb, var(--gold) 20%, var(--border));
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-h);
+  text-decoration: none;
+  font-size: 1.15rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.actu-card__share-network--whatsapp {
+  color: #25d366;
+}
+
+.actu-card__share-network--facebook {
+  color: #1877f2;
+}
+
+.actu-card__share-network:hover {
+  background: color-mix(in srgb, var(--gold) 12%, var(--bg));
+  transform: translateY(-1px);
 }
 
 .actu-ad {

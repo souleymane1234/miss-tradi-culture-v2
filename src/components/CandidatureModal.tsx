@@ -82,6 +82,19 @@ function initialFormState(): FormState {
   return { ...EMPTY_FORM }
 }
 
+function computeAgeFromBirthDate(birthDate: string): number {
+  if (!birthDate.trim()) return 0
+  const birth = new Date(birthDate)
+  if (Number.isNaN(birth.getTime())) return 0
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const monthDelta = today.getMonth() - birth.getMonth()
+  if (monthDelta < 0 || (monthDelta === 0 && today.getDate() < birth.getDate())) {
+    age -= 1
+  }
+  return Math.max(0, age)
+}
+
 export function CandidatureModal({
   open,
   onClose,
@@ -272,6 +285,12 @@ export function CandidatureModal({
       return
     }
 
+    const candidateAge = computeAgeFromBirthDate(form.birthDate)
+    if (candidateAge < 18) {
+      setError('Candidature refusee : vous devez avoir au moins 18 ans pour participer au concours.')
+      return
+    }
+
     if (!USE_MOCK_DATA) {
       if (!photoFile) {
         setError('Veuillez selectionner une photo portrait.')
@@ -370,7 +389,7 @@ export function CandidatureModal({
           />
           <div>
             <p className="candidature-modal__eyebrow">
-              {emissionTitle ?? 'Miss Tradi Culture'}
+              {emissionTitle ?? 'Miss Tradi-Culture '}
             </p>
             <h2 id={titleId} className="candidature-modal__title">
               Candidature

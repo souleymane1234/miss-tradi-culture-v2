@@ -1,7 +1,7 @@
 import './HeroVideo.css'
 
 const DEFAULT_SRC = '/videomiss.mp4'
-const DEFAULT_SUBTITLE = 'Miss Tradi Culture 2026'
+const DEFAULT_SUBTITLE = 'Miss Tradi-Culture  2026'
 const DEFAULT_TITLE = "Celebre la beaute, l'elegance et la culture"
 
 type HeroVideoProps = {
@@ -44,7 +44,7 @@ export function HeroVideo({
           controls={controls}
           playsInline
           preload="metadata"
-          aria-label="Video de presentation Miss Tradi Culture"
+          aria-label="Video de presentation Miss Tradi-Culture "
         />
       )}
       <div className="site-hero-video__overlay">

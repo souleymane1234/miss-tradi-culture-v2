@@ -13,7 +13,7 @@ const APERCU_ACTUALITES = [
     category: 'Concours',
     date: '12 mars 2026',
     isoDate: '2026-03-12',
-    title: 'Ouverture des inscriptions Miss Tradi Culture 2026',
+    title: 'Ouverture des inscriptions Miss Tradi-Culture  2026',
     excerpt:
       'Dossier, critères d’éligibilité et dates limites : tout ce qu’il faut savoir pour postuler.',
     href: `${ACTUALITES_VOIR_PLUS_HREF}#inscriptions`,
@@ -62,7 +62,7 @@ export function ActualitesAccess() {
           <div className="act-access__headline">
             <p className="act-access__eyebrow">Restez informés</p>
             <h2 id="act-access-title" className="act-access__title">
-              L&apos;actualité Miss Tradi Culture
+              L&apos;actualité Miss Tradi-Culture 
             </h2>
           </div>
           <p className="act-access__intro">

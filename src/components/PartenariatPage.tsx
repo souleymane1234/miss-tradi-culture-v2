@@ -31,7 +31,7 @@ export function PartenariatPage() {
         <section className="concours-page__section concours-page__hero">
           <div className="concours-page__inner">
             <p className="concours-page__eyebrow">Partenariat</p>
-            <h1 id="partenariat-title">Associez votre marque a Miss Tradi Culture</h1>
+            <h1 id="partenariat-title">Associez votre marque a Miss Tradi-Culture </h1>
             <p className="concours-page__lead">
               Visibilite nationale, resonance culturelle et public engage : le concours
               offre un cadre premium pour valoriser votre entreprise ou votre institution.
@@ -45,7 +45,7 @@ export function PartenariatPage() {
             <img
               className="concours-page__hero-image"
               src="/banner%20pub%20miss%20tradi.jpg"
-              alt="Visuel partenariat Miss Tradi Culture"
+              alt="Visuel partenariat Miss Tradi-Culture "
             />
           </div>
         </section>

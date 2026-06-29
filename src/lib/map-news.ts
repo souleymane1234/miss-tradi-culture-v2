@@ -66,7 +66,7 @@ export function mapNewsItemToPost(item: NewsItemDto): NewsPostCard {
   return {
     id: item.id,
     type: 'post',
-    author: item.author?.trim() || 'Miss Tradi Culture',
+    author: item.author?.trim() || 'Miss Tradi-Culture ',
     role: item.category?.name ?? 'Actualite',
     time: formatNewsRelativeTime(item.publishedAt),
     isoDate: item.publishedAt ?? '',

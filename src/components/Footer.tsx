@@ -14,9 +14,9 @@ export function Footer() {
   return (
     <footer className="site-footer" aria-label="Pied de page">
       <div className="site-footer__main">
-        <section className="site-footer__brand" aria-label="Marque Miss Tradi Culture">
+        <section className="site-footer__brand" aria-label="Marque Miss Tradi-Culture ">
           <a className="site-footer__brand-logo" href="#accueil" aria-label="Accueil">
-            <img src="/logo.png" alt="Miss Tradi Culture" width={56} height={56} />
+            <img src="/logo.png" alt="Miss Tradi-Culture " width={56} height={56} />
           </a>
           <ul className="site-footer__socials" aria-label="Reseaux sociaux">
             {SOCIAL_LINKS.map(({ href, label, icon: Icon }) => (
@@ -38,7 +38,7 @@ export function Footer() {
           <a href="/mentions-legales">Mentions légales</a>
         </div>
         <p className="site-footer__copy">
-          {CURRENT_YEAR} Miss Tradi Culture. Tous droits reserves.
+          {CURRENT_YEAR} Miss Tradi-Culture . Tous droits reserves.
         </p>
       </div>
 

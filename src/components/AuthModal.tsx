@@ -44,7 +44,7 @@ const REGISTER_CONSENT_ITEMS = [
   },
   {
     key: 'media' as const,
-    text: "J'autorise MISS TRADI CULTURE et partenaires a utiliser mes images et mes videos et leur garanti contre toutes reclamations provenant des droits des tiers*",
+    text: "J'autorise Miss Tradi-Culture  et partenaires a utiliser mes images et mes videos et leur garanti contre toutes reclamations provenant des droits des tiers*",
     linkLabel: 'Lire les mentions legales',
     href: '/mentions-legales',
   },
@@ -166,7 +166,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
         <header className="candidature-modal__header">
           <img className="candidature-modal__logo" src="/logo.png" alt="" width={64} height={64} />
           <div>
-            <p className="candidature-modal__eyebrow">Miss Tradi Culture</p>
+            <p className="candidature-modal__eyebrow">Miss Tradi-Culture </p>
             <h2 id={titleId} className="candidature-modal__title">
               {authMode === 'login' ? 'Connexion' : 'Inscription'}
             </h2>

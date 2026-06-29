@@ -18,7 +18,7 @@ export function AdventureSection() {
           <p className="adv-section__eyebrow">L&apos;aventure d&apos;une vie</p>
           <h2 id="adv-section-title" className="adv-section__title">
             <span className="adv-section__title-line">Devenez la prochaine</span>
-            <span className="adv-section__title-accent">Miss Côte d&apos;Ivoire</span>
+            <span className="adv-section__title-accent">Miss Tradi-Culture</span>
           </h2>
           <p className="adv-section__body">
             Osez vivre une expérience inoubliable. Découvrez les critères de

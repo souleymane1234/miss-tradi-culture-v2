@@ -13,7 +13,7 @@ type PromoBannerProps = {
 
 export function PromoBanner({
   src = DEFAULT_SRC,
-  alt = 'Bannière promotionnelle Miss Tradi Culture',
+  alt = 'Bannière promotionnelle Miss Tradi-Culture ',
 }: PromoBannerProps) {
   const { ref, isVisible } = useRevealOnView<HTMLDivElement>()
   const [imageLoaded, setImageLoaded] = useState(false)

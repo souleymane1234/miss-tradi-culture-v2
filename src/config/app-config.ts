@@ -7,7 +7,7 @@ function readEnvString(key: string): string | undefined {
 const emissionId = readEnvString('VITE_EMISSION_ID') ?? ''
 const useMockFlag = readEnvString('VITE_USE_MOCK_DATA') === 'true'
 
-/** Identifiant de l'émission Miss Tradi Culture côté API. */
+/** Identifiant de l'émission Miss Tradi-Culture  côté API. */
 export const EMISSION_ID = emissionId
 
 /** Données locales éditions/votes uniquement si explicitement demandé. */

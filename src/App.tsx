@@ -11,7 +11,6 @@ import { EditionPage } from './components/EditionPage'
 import { VotePage } from './components/VotePage'
 import { PlayPage } from './components/PlayPage'
 import { PartnersTrustCarousel } from './components/PartnersTrustCarousel'
-import { OfficialAppPromo } from './components/OfficialAppPromo'
 import { PromoBanner } from './components/PromoBanner'
 import { SectionBridge } from './components/SectionBridge'
 import { ProfilePage } from './components/ProfilePage'
@@ -192,7 +191,8 @@ function App() {
       <SectionBridge variant="ribbon" />
       <PartnersTrustCarousel />
       <SectionBridge variant="wave" />
-      <OfficialAppPromo />
+      {/* Section "L'application officielle Miss Tradi-Culture" masquee temporairement. */}
+      {/* <OfficialAppPromo /> */}
       <SectionBridge variant="wave" />
 
       <div className="ticks"></div>

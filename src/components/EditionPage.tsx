@@ -483,7 +483,7 @@ export function EditionPage() {
     }
 
     return {
-      eyebrow: resolvedEmission.emission?.title ?? 'Miss Tradi Culture',
+      eyebrow: resolvedEmission.emission?.title ?? 'Miss Tradi-Culture ',
       title: edition?.title ?? '',
       description: edition?.description || emissionDescription,
       principles: edition?.theme ?? '',
@@ -588,7 +588,7 @@ export function EditionPage() {
           />
           <div className="site-hero-video__overlay">
             <p className="site-hero-video__subtitle">
-              {resolvedEmission.emission?.title ?? presentation.eyebrow ?? 'Miss Tradi Culture'}
+              {resolvedEmission.emission?.title ?? presentation.eyebrow ?? 'Miss Tradi-Culture '}
             </p>
             <h1 className="site-hero-video__title">{`Edition ${edition.year}`}</h1>
           </div>
@@ -603,7 +603,7 @@ export function EditionPage() {
             undefined
           }
           imageAlt={`Visuel edition ${edition.year}`}
-          subtitle={resolvedEmission.emission?.title ?? presentation.eyebrow ?? 'Miss Tradi Culture'}
+          subtitle={resolvedEmission.emission?.title ?? presentation.eyebrow ?? 'Miss Tradi-Culture '}
           title={`Edition ${edition.year}`}
         />
       )}
@@ -797,7 +797,7 @@ export function EditionPage() {
           <div className="concours-page__inner">
             <h2>Autres editions</h2>
             <p className="edition-page__section-intro">
-              Parcourez les editions precedentes du concours Miss Tradi Culture.
+              Parcourez les editions precedentes du concours Miss Tradi-Culture .
             </p>
             <div className="edition-page__history">
               {catalog

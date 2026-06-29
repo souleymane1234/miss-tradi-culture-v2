@@ -69,7 +69,7 @@ export function CGUPage() {
           <p className="concours-page__eyebrow">Informations légales</p>
           <h1 id="cgu-title">Conditions Générales d&apos;Utilisation</h1>
           <p className="concours-page__lead">
-            Règles d&apos;accès et d&apos;utilisation de la plateforme Miss Tradi Culture
+            Règles d&apos;accès et d&apos;utilisation de la plateforme Miss Tradi-Culture 
             opérée par BOOZ-TECH.
           </p>
         </div>

@@ -28,7 +28,7 @@ export function PartnersTrustCarousel({ includeAnchorId = true }: PartnersTrustC
             Nos partenaires
           </h2>
           <p className="partners-trust__intro">
-            Entreprises et structures qui soutiennent Miss Tradi Culture et
+            Entreprises et structures qui soutiennent Miss Tradi-Culture  et
             donnent de la visibilité à l&apos;édition.
           </p>
         </header>

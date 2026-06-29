@@ -12,26 +12,10 @@ import { CandidatureModal } from './CandidatureModal'
 import './ConcoursPage.css'
 
 const ETAPES = [
-  {
-    titre: 'Pre-inscriptions',
-    periode: 'Du 01 au 30 juin 2026',
-    details: "Depot en ligne du dossier de candidature et verification d'eligibilite.",
-  },
-  {
-    titre: 'Pre-selections regionales',
-    periode: 'Juillet 2026',
-    details: 'Castings regionaux et entretiens avec le comite de selection.',
-  },
-  {
-    titre: 'Bootcamp des candidates',
-    periode: 'Aout 2026',
-    details: 'Formation scene, expression orale, culture generale et image publique.',
-  },
-  {
-    titre: 'Grande finale',
-    periode: 'Septembre 2026',
-    details: 'Soiree officielle avec jury, partenaires et diffusion mediatique.',
-  },
+  'Phase 1 : Preselection',
+  'Phase 2 : Telerealite',
+  'Phase 3 : Competition',
+  'Phase 4 : Caravane miss',
 ] as const
 
 const CRITERES = [
@@ -85,10 +69,23 @@ export function ConcoursPage() {
       <SectionBridge variant="ribbon" />
 
       <section id="concours" className="concours-page__stack">
+        <section className="concours-page__section">
+          <div className="concours-page__inner">
+            <h2>Criteres de participation</h2>
+            <ul className="concours-page__list">
+              {CRITERES.map((critere) => (
+                <li key={critere}>{critere}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <SectionBridge variant="wave" />
+
         <section className="concours-page__section concours-page__hero">
           <div className="concours-page__inner">
             <p className="concours-page__eyebrow">Le concours</p>
-            <h1 id="concours-title">Miss Tradi Culture 2026</h1>
+            <h1 id="concours-title">Miss Tradi-Culture  2026</h1>
             <p className="concours-page__lead">
               Une competition qui celebre la beaute, l&apos;elegance et
               l&apos;identite culturelle. Retrouvez le calendrier, les criteres et
@@ -107,22 +104,18 @@ export function ConcoursPage() {
             <img
               className="concours-page__hero-image"
               src="/affiche%20miss%20tradi_Plan%20de%20travail%201.jpg"
-              alt="Affiche officielle Miss Tradi Culture"
+              alt="Affiche officielle Miss Tradi-Culture "
             />
           </div>
         </section>
-
-        <SectionBridge variant="wave" />
 
         <section className="concours-page__section">
           <div className="concours-page__inner">
             <h2>Les etapes du concours</h2>
             <div className="concours-page__timeline">
               {ETAPES.map((etape) => (
-                <article key={etape.titre} className="concours-page__step">
-                  <p className="concours-page__step-date">{etape.periode}</p>
-                  <h3>{etape.titre}</h3>
-                  <p>{etape.details}</p>
+                <article key={etape} className="concours-page__step">
+                  <h3>{etape}</h3>
                 </article>
               ))}
             </div>
@@ -130,17 +123,6 @@ export function ConcoursPage() {
         </section>
 
         <SectionBridge variant="ribbon" />
-
-        <section className="concours-page__section">
-          <div className="concours-page__inner">
-            <h2>Criteres de participation</h2>
-            <ul className="concours-page__list">
-              {CRITERES.map((critere) => (
-                <li key={critere}>{critere}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
 
         <SectionBridge variant="wave" />
 

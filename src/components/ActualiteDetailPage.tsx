@@ -19,7 +19,7 @@ const MOCK_ARTICLES: Record<
     summary:
       'Les pre-inscriptions 2026 sont ouvertes. Merci de verifier les conditions et le dossier de candidature avant envoi.',
     imageSrc: '/affiche%20miss%20tradi_Plan%20de%20travail%201.jpg',
-    author: 'Comite Miss Tradi Culture',
+    author: 'Comite Miss Tradi-Culture ',
     category: 'Compte officiel',
     publishedAt: '2026-05-19T09:07:00.000Z',
   },
@@ -52,7 +52,7 @@ export function ActualiteDetailPage() {
           title: apiArticle.title,
           summary: apiArticle.summary?.trim() || apiArticle.title,
           imageSrc: apiArticle.mainImage ?? undefined,
-          author: apiArticle.author?.trim() || 'Miss Tradi Culture',
+          author: apiArticle.author?.trim() || 'Miss Tradi-Culture ',
           category: apiArticle.category?.name ?? 'Actualite',
           publishedAt: apiArticle.publishedAt ?? '',
           views: apiArticle.views ?? 0,

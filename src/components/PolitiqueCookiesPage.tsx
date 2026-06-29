@@ -65,7 +65,7 @@ export function PolitiqueCookiesPage() {
           <p className="concours-page__eyebrow">Informations légales</p>
           <h1 id="cookies-title">Politique de cookies</h1>
           <p className="concours-page__lead">
-            Informations sur l&apos;utilisation des cookies sur Miss Tradi Culture
+            Informations sur l&apos;utilisation des cookies sur Miss Tradi-Culture 
             opéré par BOOZ-TECH.
           </p>
         </div>

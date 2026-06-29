@@ -85,7 +85,7 @@ export function PolitiqueConfidentialitePage() {
           <p className="concours-page__eyebrow">Informations légales</p>
           <h1 id="confidentialite-title">Politique de confidentialité</h1>
           <p className="concours-page__lead">
-            Protection et traitement de vos données personnelles sur Miss Tradi Culture
+            Protection et traitement de vos données personnelles sur Miss Tradi-Culture 
             opéré par BOOZ-TECH.
           </p>
         </div>

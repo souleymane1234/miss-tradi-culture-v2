@@ -29,7 +29,7 @@ export function OfficialAppPromo({
       <div className="official-app__inner">
         <p className="official-app__eyebrow">Mobile</p>
         <h2 id="official-app-title" className="official-app__title">
-          L&apos;application officielle Miss Tradi Culture
+          L&apos;application officielle Miss Tradi-Culture 
         </h2>
         <p className="official-app__lead">
           L&apos;excellence à portée de main. Suivez l&apos;actualité en temps

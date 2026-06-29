@@ -40,7 +40,7 @@ export function MentionsLegalesPage() {
           <h1 id="mentions-legales-title">Mentions légales</h1>
           <p className="concours-page__lead">
             Conditions d&apos;utilisation, propriété intellectuelle et traitement des données
-            personnelles sur Miss Tradi Culture.
+            personnelles sur Miss Tradi-Culture .
           </p>
         </div>
       </section>
